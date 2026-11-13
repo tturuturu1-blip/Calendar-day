@@ -10,7 +10,9 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Добавлен ?v=3 для сброса кеша -->
+    <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
     <div class="app-container">
@@ -47,7 +49,10 @@
             <div class="schedule-section" id="scheduleSection">
                 <div class="agenda-header">
                     <div class="date-info">
-                        <div class="date-large" id="selectedDateLarge">13</div>
+                        <div class="date-large">
+                            <span id="selectedDateLarge">13</span>
+                            <span id="selectedMonth" class="month-small">ноября</span>
+                        </div>
                         <div class="full-weekday" id="agendaWeekday">Понедельник</div>
                     </div>
                     <div class="agenda-controls">
@@ -120,6 +125,7 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- Добавлен ?v=3 для сброса кеша -->
+    <script src="js/app.js?v=3"></script>
 </body>
 </html>
