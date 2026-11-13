@@ -36,6 +36,7 @@ const pad = n => String(n).padStart(2, '0');
 const formatDateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_GENITIVE = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WEEKDAYS_FULL = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
 function roundToHalfHour(timeStr) {
@@ -46,7 +47,6 @@ function roundToHalfHour(timeStr) {
     return `${pad(h)}:${m}`;
 }
 
-// Добавляет 30 минут к времени
 function addHalfHourToTime(timeStr) {
     if (!timeStr) return '00:30';
     let [h, m] = timeStr.split(':').map(Number);
@@ -65,6 +65,7 @@ const weekdaysHeader = document.getElementById('weekdaysHeader');
 const viewToggleBtn = document.getElementById('viewToggleBtn');
 
 const selectedDateLarge = document.getElementById('selectedDateLarge');
+const selectedMonth = document.getElementById('selectedMonth');
 const agendaWeekday = document.getElementById('agendaWeekday');
 const eventSummary = document.getElementById('eventSummary');
 const scheduleSection = document.getElementById('scheduleSection');
@@ -114,7 +115,6 @@ function renderMonth() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    // Логика отображения заголовка: Месяц или Диапазон недели
     if (isCalendarExpanded) {
         monthTitle.textContent = MONTHS_RU[month];
     } else {
@@ -131,11 +131,9 @@ function renderMonth() {
         const startMonth = MONTHS_SHORT[startOfWeek.getMonth()];
         const endMonth = MONTHS_SHORT[endOfWeek.getMonth()];
 
-        // Если неделя не переходит на другой месяц, выводим просто "13 - 19"
         if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
             monthTitle.textContent = `${startDay} - ${endDay}`;
         } else {
-            // Если переходит: "28 окт - 3 ноя"
             monthTitle.textContent = `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
         }
     }
@@ -202,10 +200,10 @@ function renderAgenda() {
     const todayKey = formatDateKey(new Date());
     
     selectedDateLarge.textContent = selectedDate.getDate();
+    selectedMonth.textContent = MONTHS_GENITIVE[selectedDate.getMonth()];
     agendaWeekday.textContent = WEEKDAYS_FULL[selectedDate.getDay()];
 
     const dayEvents = events[key] || [];
-    dayEvents.sort((a, b) => a.time.localeCompare(b.time));
     
     const count = dayEvents.length;
     let eventWord = 'событий';
@@ -213,95 +211,130 @@ function renderAgenda() {
     else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
     eventSummary.textContent = `${count} ${eventWord}`;
 
-    let timelineHtml = '';
-    
-    const eventsBySlot = {};
-    dayEvents.forEach(ev => {
-        const slotTime = roundToHalfHour(ev.time);
-        if (!eventsBySlot[slotTime]) eventsBySlot[slotTime] = [];
-        eventsBySlot[slotTime].push(ev);
+    const SLOT_HEIGHT = 80;
+    const TOTAL_SLOTS = 48;
+
+    const parsedEvents = dayEvents.map(ev => {
+        const [sh, sm] = ev.time.split(':').map(Number);
+        const startMins = sh * 60 + sm;
+        
+        const endTimeStr = ev.endTime || addHalfHourToTime(ev.time);
+        const [eh, em] = endTimeStr.split(':').map(Number);
+        let endMins = eh * 60 + em;
+        if (endMins <= startMins) endMins += 24 * 60;
+
+        const topPx = (startMins / 30) * SLOT_HEIGHT;
+        const durationMins = endMins - startMins;
+        
+        const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - 6);
+
+        return { ...ev, endTimeStr, startMins, endMins, topPx, heightPx };
     });
 
-    for (let h = 0; h < 24; h++) {
-        for (let m of ['00', '30']) {
-            const timeStr = `${pad(h)}:${m}`;
-            const slotEvents = eventsBySlot[timeStr] || [];
-            
-            let slotContentHtml = slotEvents.map(ev => renderTimelineCard(ev, key)).join('');
+    parsedEvents.sort((a, b) => a.startMins - b.startMins);
 
-            if (inlineFormTime === timeStr) {
-                slotContentHtml += `
-                    <div class="inline-form">
-                        <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
-                        <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
-                        <div class="inline-actions">
-                            <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
-                            <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
+    let gridHtml = '';
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
+        const timeStr = `${pad(Math.floor(i/2))}:${i % 2 === 0 ? '00' : '30'}`;
+        const slotStartMin = i * 30;
+        const slotEndMin = slotStartMin + 30;
+
+        const isOccupied = parsedEvents.some(ev => 
+            (ev.startMins < slotEndMin && ev.endMins > slotStartMin)
+        );
+
+        const isFormOpen = (inlineFormTime === timeStr);
+
+        gridHtml += `
+            <div class="time-row" style="top: ${i * SLOT_HEIGHT}px;">
+                <div class="time-label">
+                    <span class="time-text">${timeStr}</span>
+                </div>
+                
+                ${!isOccupied && !isFormOpen ? `
+                    <div class="empty-slot-content">
+                        <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Добавить событие
+                        </button>
+                    </div>
+                ` : ''}
+                
+                ${isOccupied && !isFormOpen ? `
+                    <button class="add-small-btn" onclick="openSmallAddModal('${timeStr}')" title="Добавить событие">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                ` : ''}
+                
+                ${isFormOpen ? `
+                    <div class="inline-form-wrapper">
+                        <div class="inline-form">
+                            <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
+                            <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
+                            <div class="inline-actions">
+                                <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
+                                <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
+                            </div>
                         </div>
                     </div>
-                `;
-            } else {
-                slotContentHtml += `
-                    <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Добавить событие
-                    </button>
-                `;
-            }
-            
-            timelineHtml += `
-                <div class="hour-slot">
-                    <div class="time-label">${timeStr}</div>
-                    <div class="slot-content">
-                        ${slotContentHtml}
-                    </div>
-                </div>
-            `;
-        }
+                ` : ''}
+            </div>
+        `;
     }
 
-    timelineWrapper.innerHTML = timelineHtml;
+    let eventsHtml = '';
+    parsedEvents.forEach(ev => {
+        const isShort = ev.heightPx < 45;
+        eventsHtml += `
+            <div class="absolute-event-card ${isShort ? 'short-event' : ''}" style="top: ${ev.topPx}px; height: ${ev.heightPx}px;">
+                <div class="event-actions">
+                    <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteEvent('${key}', '${ev.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+                <div class="event-title">${ev.title}</div>
+                <div class="event-time-range">${ev.time} - ${ev.endTimeStr}</div>
+                ${ev.desc && !isShort ? `<div class="event-desc">${ev.desc}</div>` : ''}
+            </div>
+        `;
+    });
 
-    // Прокрутка к нужному часу
+    timelineWrapper.innerHTML = `
+        <div class="timeline-container" style="height: ${TOTAL_SLOTS * SLOT_HEIGHT}px;">
+            <div class="timeline-grid-layer">
+                ${gridHtml}
+            </div>
+            <div class="timeline-events-layer">
+                ${eventsHtml}
+            </div>
+        </div>
+    `;
+
     setTimeout(() => {
-        const now = new Date();
-        let scrollHour = 8;
-        if (key === todayKey && inlineFormTime === null) {
-            scrollHour = now.getHours();
-        } else if (inlineFormTime) {
-            scrollHour = parseInt(inlineFormTime.split(':')[0]);
-        }
+        const stickyHeader = document.querySelector('.agenda-header');
+        const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
         
-        const targetSlot = timelineWrapper.children[scrollHour * 2];
-        if (targetSlot) {
-            const stickyHeader = document.querySelector('.agenda-header');
-            const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-            scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 5;
+        if (inlineFormTime) {
+            const [h, m] = inlineFormTime.split(':').map(Number);
+            const targetTop = ((h * 60 + m) / 30) * SLOT_HEIGHT;
+            scheduleSection.scrollTop = targetTop - headerHeight - 20;
+        } else if (key === todayKey) {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const targetTop = (currentMinutes / 30) * SLOT_HEIGHT;
+            scheduleSection.scrollTop = targetTop - headerHeight - 20;
+        } else if (parsedEvents.length > 0) {
+            scheduleSection.scrollTop = parsedEvents[0].topPx - headerHeight - 20;
+        } else {
+            scheduleSection.scrollTop = (8 * 60 / 30) * SLOT_HEIGHT - headerHeight - 20;
         }
     }, 50);
 }
 
-function renderTimelineCard(ev, dateKey) {
-    // Если endTime нет (старые записи), ставим +30 минут
-    const endTime = ev.endTime || addHalfHourToTime(ev.time); 
-    return `
-        <div class="timeline-card">
-            <div class="event-actions">
-                <button class="action-btn edit" onclick="editEvent('${dateKey}', '${ev.id}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                </button>
-                <button class="action-btn delete" onclick="deleteEvent('${dateKey}', '${ev.id}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>
-            <div class="event-title">${ev.title}</div>
-            <div class="event-time-range">${ev.time} - ${endTime}</div>
-            ${ev.desc ? `<div class="event-desc">${ev.desc}</div>` : ''}
-        </div>
-    `;
-}
-
-// ==================== ВСТРОЕННАЯ ФОРМА (INLINE) ====================
+// ==================== ОБРАБОТКА ФОРМ ====================
 window.openInlineForm = (timeStr) => {
     inlineFormTime = timeStr;
     renderAgenda();
@@ -329,7 +362,6 @@ window.saveInlineEvent = (dateKey, timeStr) => {
         return;
     }
     
-    // Ставим длительность 30 минут вместо часа
     const endTime = addHalfHourToTime(timeStr);
     
     if (!events[dateKey]) events[dateKey] = [];
@@ -348,8 +380,20 @@ window.saveInlineEvent = (dateKey, timeStr) => {
     renderAgenda();
 };
 
-// ==================== МОДАЛЬНЫЕ ОКНА ====================
-// Кнопка "+" в шапке теперь открывает форму с длительностью 30 минут по умолчанию
+window.openSmallAddModal = (timeStr) => {
+    editingEventInfo = null;
+    modalTitle.textContent = 'Новое событие';
+    
+    evTitle.value = '';
+    evDesc.value = '';
+    evDate.value = formatDateKey(selectedDate);
+    evTime.value = timeStr;
+    evEndTime.value = addHalfHourToTime(timeStr);
+    
+    modal.classList.add('active');
+    setTimeout(() => evTitle.focus(), 300);
+};
+
 document.getElementById('addBtn').addEventListener('click', () => {
     editingEventInfo = null;
     modalTitle.textContent = 'Новое событие';
@@ -358,7 +402,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
     evDesc.value = '';
     evDate.value = formatDateKey(selectedDate);
     evTime.value = '09:00';
-    evEndTime.value = '09:30'; // Изменено на полчаса
+    evEndTime.value = '09:30';
     
     modal.classList.add('active');
     setTimeout(() => evTitle.focus(), 300);
@@ -374,8 +418,6 @@ window.editEvent = (dateKey, id) => {
     evTitle.value = ev.title;
     evDate.value = dateKey;
     evTime.value = ev.time;
-    
-    // Если у старого события нет endTime, высчитываем как +30 минут
     evEndTime.value = ev.endTime || addHalfHourToTime(ev.time); 
     evDesc.value = ev.desc || '';
     
@@ -498,10 +540,8 @@ monthPickerModal.addEventListener('click', (e) => { if (e.target === monthPicker
 // ==================== НАВИГАЦИЯ ====================
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
     if (isCalendarExpanded) {
-        // Листаем месяц назад
         currentDate.setMonth(currentDate.getMonth() - 1);
     } else {
-        // Листаем неделю назад
         selectedDate.setDate(selectedDate.getDate() - 7);
         currentDate.setDate(currentDate.getDate() - 7);
         renderAgenda();
@@ -511,10 +551,8 @@ document.getElementById('prevMonthBtn').addEventListener('click', () => {
 
 document.getElementById('nextMonthBtn').addEventListener('click', () => {
     if (isCalendarExpanded) {
-        // Листаем месяц вперед
         currentDate.setMonth(currentDate.getMonth() + 1);
     } else {
-        // Листаем неделю вперед
         selectedDate.setDate(selectedDate.getDate() + 7);
         currentDate.setDate(currentDate.getDate() + 7);
         renderAgenda();
