@@ -31,14 +31,11 @@
                 </div>
             </header>
 
-            <!-- Сетка календаря (развернутая) -->
+            <!-- Сетка календаря (отображает либо месяц, либо неделю) -->
             <div class="weekdays" id="weekdaysHeader">
                 <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
             </div>
             <div class="days-grid" id="daysGrid"></div>
-
-            <!-- Лента недели (свернутая) -->
-            <div class="week-strip hidden" id="weekStrip"></div>
 
             <!-- Карточка с расписанием на выбранный день -->
             <div class="agenda-section">
@@ -62,7 +59,7 @@
 
     </div>
 
-    <!-- Модальное окно (Оставлено ТОЛЬКО для редактирования существующих событий) -->
+    <!-- Модальное окно (для редактирования событий) -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <div class="modal-header">
