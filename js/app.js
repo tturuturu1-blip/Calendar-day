@@ -27,9 +27,9 @@ let currentDate = new Date();
 let selectedDate = new Date();
 let pickerDate = new Date();
 let editingEventInfo = null;
-let pendingDeleteInfo = null; // Для модального окна удаления
+let pendingDeleteInfo = null; 
 
-let isCalendarExpanded = false; // ПРИ ОТКРЫТИИ СРАЗУ НЕДЕЛЯ
+let isCalendarExpanded = false; 
 let inlineFormTime = null;
 let expandedEvents = new Set(); 
 
@@ -200,7 +200,7 @@ viewToggleBtn.addEventListener('click', () => {
 
 // ==================== РАЗВОРАЧИВАНИЕ КАРТОЧЕК ====================
 window.toggleEventExpand = (id, event) => {
-    event.stopPropagation(); // Предотвращаем двойное срабатывание, если клик по кнопке
+    if (event) event.stopPropagation();
     if (expandedEvents.has(id)) {
         expandedEvents.delete(id);
     } else {
@@ -228,7 +228,7 @@ function renderAgenda() {
 
     const SLOT_HEIGHT = 80;
     const TOTAL_SLOTS = 48;
-    const TOP_OFFSET = 22; 
+    const TOP_OFFSET = 20; // Сдвиг карточки ровно под линию
 
     const parsedEvents = dayEvents.map(ev => {
         const [sh, sm] = ev.time.split(':').map(Number);
@@ -241,6 +241,8 @@ function renderAgenda() {
 
         const topPx = (startMins / 30) * SLOT_HEIGHT + TOP_OFFSET;
         const durationMins = endMins - startMins;
+        
+        // Используем базовую высоту, но она будет растягиваться за счет min-height
         const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - TOP_OFFSET - 4);
 
         return { ...ev, endTimeStr, startMins, endMins, topPx, heightPx };
@@ -298,13 +300,13 @@ function renderAgenda() {
     let eventsHtml = '';
     parsedEvents.forEach(ev => {
         const isExpanded = expandedEvents.has(ev.id);
-        const heightStyle = isExpanded ? '' : `height: ${ev.heightPx}px;`;
+        // Используем min-height вместо height, чтобы карточка растягивалась под контент
+        const heightStyle = isExpanded ? '' : `min-height: ${ev.heightPx}px; height: auto;`;
         
-        // Показываем галочку только если есть описание
         const hasDesc = ev.desc && ev.desc.trim().length > 0;
         const toggleBtnHtml = hasDesc ? `
             <button class="toggle-desc-btn" onclick="toggleEventExpand('${ev.id}', event)" title="Показать/скрыть описание">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
         ` : '';
 
@@ -618,9 +620,7 @@ document.getElementById('todayBtn').addEventListener('click', () => {
 });
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-// При старте вызываем переключение вида, чтобы текст кнопки сменился на "Календарь"
 viewToggleBtn.textContent = isCalendarExpanded ? 'Расписание' : 'Календарь';
-
 selectedDate = new Date();
 currentDate = new Date();
 renderMonth();
