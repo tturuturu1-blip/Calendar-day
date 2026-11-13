@@ -229,7 +229,7 @@ body {
 .agenda-header {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 50;
     background-color: var(--bg-color);
     padding: 15px 20px;
     margin: 0 -20px; 
@@ -280,42 +280,51 @@ body {
     color: var(--secondary-text);
 }
 
-/* Таймлайн */
+/* ==================== ТАЙМЛАЙН (АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ) ==================== */
 .timeline-wrapper {
     position: relative;
+    margin-top: 10px;
 }
 
-/* Слот на полчаса */
-.hour-slot {
-    display: flex;
-    min-height: 80px;
+.timeline-container {
     position: relative;
-    align-items: stretch; 
-    /* Убрали нижнюю границу, чтобы линия шла строго через точки */
+    width: 100%;
 }
 
-/* Разделительная горизонтальная линия, выходящая из точки */
-.hour-slot::before {
+.timeline-grid-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; /* Пропускаем клики сквозь сетку */
+}
+
+.time-row {
+    position: absolute;
+    left: 0; right: 0;
+    height: 80px; /* Высота одного 30-минутного слота */
+}
+
+/* Горизонтальная разделительная линия */
+.time-row::after {
     content: '';
     position: absolute;
-    left: 55px; /* Начинается ровно от вертикальной линии */
+    left: 55px;
     right: 0;
-    top: 12px; /* Выровнено строго по центру точки */
-    border-top: 1px dashed #000000; /* Черная линия */
+    top: 12px;
+    border-top: 1px dashed #000000;
     z-index: 1;
 }
 
-/* Метка времени слева */
 .time-label {
+    position: absolute;
+    left: 0; top: 0;
     width: 55px;
-    flex-shrink: 0;
-    font-size: 12px;
-    font-weight: 700;
-    color: #000000; /* Черный цвет времени */
+    height: 100%;
+    padding-top: 6px;
     text-align: right;
     padding-right: 12px;
-    padding-top: 6px;
-    position: relative;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000000;
 }
 
 /* Точка на линии */
@@ -323,31 +332,26 @@ body {
     content: '';
     position: absolute;
     right: -5px;
-    top: 8px; /* Центр точки (8px + 4px радиус = 12px) */
+    top: 8px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #000000; /* Черная точка */
+    background: #000000;
     z-index: 2;
 }
 
-/* Правая часть (вертикальная линия и контент) */
-.slot-content {
-    flex-grow: 1;
-    border-left: 2px solid #000000; /* Черная вертикальная линия */
-    padding-left: 16px;
-    padding-top: 24px; /* Опускаем контент ниже, чтобы был отступ от горизонтальной линии */
-    padding-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: relative;
-    z-index: 2;
+/* Контейнер для пустого слота (кнопка "Добавить событие") */
+.empty-slot-content {
+    position: absolute;
+    left: 71px; /* 55px (время) + 16px (отступ) */
+    right: 10px;
+    top: 22px;
+    pointer-events: auto;
 }
 
-/* Кнопка "Добавить событие" */
+/* Кнопка "Добавить событие" для пустых слотов */
 .add-slot-btn {
-    background: var(--bg-color); /* Добавили фон, чтобы линия не просвечивала */
+    background: var(--bg-color);
     border: 2px dashed #cbd5e1;
     border-radius: 12px;
     padding: 12px;
@@ -369,7 +373,38 @@ body {
     color: var(--primary-text);
 }
 
-/* ==================== ВСТРОЕННАЯ ФОРМА (INLINE) ==================== */
+/* Маленькая кнопка с плюсиком для занятых слотов */
+.add-small-btn {
+    position: absolute;
+    left: 42px; /* Ровно под временем */
+    top: 25px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--dark-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 5;
+    padding: 0;
+    color: var(--primary-text);
+    transition: background 0.2s;
+}
+.add-small-btn:hover { background: var(--accent-hover); }
+
+/* Обертка для встроенной формы */
+.inline-form-wrapper {
+    position: absolute;
+    left: 71px;
+    right: 10px;
+    top: 20px;
+    z-index: 40;
+    pointer-events: auto;
+}
+
 .inline-form {
     background: var(--card-bg);
     border: 1px solid var(--dark-border);
@@ -379,7 +414,7 @@ body {
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .inline-form input, .inline-form textarea {
@@ -431,36 +466,66 @@ body {
 }
 .btn-cancel:hover { background: var(--accent-hover); }
 
-/* ==================== КАРТОЧКА СОБЫТИЯ ==================== */
-.timeline-card {
-    background: var(--card-bg);
-    border-radius: 14px;
-    padding: 12px 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #cbd5e1;
-    border-left: 6px solid var(--dot-cyan);
-    position: relative;
-    z-index: 2;
+/* ==================== СЛОЙ СОБЫТИЙ ==================== */
+.timeline-events-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; /* Пропускаем клики сквозь слой */
 }
 
-.timeline-card .event-title {
+/* Карточка события, позиционируемая абсолютно */
+.absolute-event-card {
+    position: absolute;
+    left: 71px; /* Выравнивание по сетке */
+    right: 10px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #cbd5e1;
+    border-left: 6px solid var(--dot-cyan);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Обрезаем текст, если не влезает */
+    pointer-events: auto; /* Включаем клики для самой карточки */
+}
+
+.absolute-event-card .event-title {
     font-size: 15px;
     font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 4px;
     padding-right: 60px;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.timeline-card .event-time-range {
-    font-size: 13px;
+
+.absolute-event-card .event-time-range {
+    font-size: 12px;
     color: var(--secondary-text);
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
-.timeline-card .event-desc {
-    font-size: 13px;
+
+.absolute-event-card .event-desc {
+    font-size: 12px;
     color: var(--secondary-text);
-    line-height: 1.4;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Если событие короткое (15 минут), прячем описание */
+.absolute-event-card.short-event .event-desc {
+    display: none;
+}
+.absolute-event-card.short-event .event-time-range {
+    margin-bottom: 0;
 }
 
 .event-actions {
