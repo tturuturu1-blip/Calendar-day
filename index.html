@@ -31,21 +31,25 @@
                 </div>
             </header>
 
-            <!-- Сетка календаря -->
-            <div class="weekdays">
+            <!-- Сетка календаря (развернутая) -->
+            <div class="weekdays" id="weekdaysHeader">
                 <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
             </div>
             <div class="days-grid" id="daysGrid"></div>
 
+            <!-- Лента недели (свернутая) -->
+            <div class="week-strip hidden" id="weekStrip"></div>
+
             <!-- Карточка с расписанием на выбранный день -->
             <div class="agenda-section">
                 <div class="agenda-header">
-                    <div>
-                        <span class="today-label" id="agendaDateLabel">СЕГОДНЯ</span>
+                    <div class="date-info">
                         <div class="date-large" id="selectedDateLarge">13</div>
+                        <div class="full-weekday" id="agendaWeekday">Понедельник</div>
                     </div>
-                    <div class="agenda-summary">
-                        <span id="eventSummary">0 событий</span>
+                    <div class="agenda-controls">
+                        <button class="view-toggle-btn" id="viewToggleBtn">Расписание</button>
+                        <span class="event-count" id="eventSummary">0 событий</span>
                     </div>
                 </div>
 
@@ -58,11 +62,11 @@
 
     </div>
 
-    <!-- Модальное окно: ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ СОБЫТИЯ -->
+    <!-- Модальное окно (Оставлено ТОЛЬКО для редактирования существующих событий) -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Новое событие</h3>
+                <h3 id="modalTitle">Редактировать событие</h3>
                 <button class="close-modal-btn" id="closeModalBtn">&times;</button>
             </div>
             <form id="eventForm">
