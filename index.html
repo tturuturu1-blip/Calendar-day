@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
-    <!-- Добавлен ?v=3 для сброса кеша -->
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <!-- Добавлен ?v=4 для сброса кеша -->
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
     <div class="app-container">
@@ -125,7 +125,19 @@
         </div>
     </div>
 
-    <!-- Добавлен ?v=3 для сброса кеша -->
-    <script src="js/app.js?v=3"></script>
+    <!-- Модальное окно: ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content" style="padding: 24px; text-align: center;">
+            <h3 style="margin-bottom: 10px; font-size: 18px;">Удалить событие?</h3>
+            <p style="color: var(--secondary-text); margin-bottom: 24px;">Это действие нельзя будет отменить.</p>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-cancel" style="flex: 1; padding: 12px; font-size: 14px; border-radius: 12px; font-weight: 700;" onclick="closeDeleteModal()">Отмена</button>
+                <button class="submit-btn" style="flex: 1; margin-top: 0; background: #ef4444; border-color: #dc2626; border-radius: 12px;" onclick="confirmDelete()">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Добавлен ?v=4 для сброса кеша -->
+    <script src="js/app.js?v=4"></script>
 </body>
 </html>
