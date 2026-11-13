@@ -222,7 +222,7 @@ body {
 .schedule-section {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 0 15px 40px 15px; /* Слегка уменьшили отступы по бокам */
+    padding: 0 10px 40px 10px; /* Уменьшили боковые отступы */
     position: relative;
 }
 
@@ -231,8 +231,8 @@ body {
     top: 0;
     z-index: 50;
     background-color: var(--bg-color);
-    padding: 15px 15px 15px 15px;
-    margin: 0 -15px; 
+    padding: 15px 10px;
+    margin: 0 -10px; 
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -312,7 +312,7 @@ body {
 /* Единая вертикальная линия */
 .vertical-line {
     position: absolute;
-    left: 48px; /* Сдвинуто влево */
+    left: 45px; /* Сдвинуто влево */
     top: 0;
     bottom: 0;
     border-left: 2px solid #000000;
@@ -329,7 +329,7 @@ body {
 .time-row::after {
     content: '';
     position: absolute;
-    left: 48px;
+    left: 45px;
     right: 0;
     top: 18px;
     border-top: 1px dashed #000000;
@@ -340,7 +340,7 @@ body {
 .time-label {
     position: absolute;
     left: 0; top: 10px;
-    width: 40px;
+    width: 36px; /* Сделали чуть уже для компактности */
     text-align: right;
     font-size: 12px;
     font-weight: 700;
@@ -350,7 +350,7 @@ body {
 /* Точка на пересечении */
 .time-dot {
     position: absolute;
-    left: 44px; /* Центрирование на линии (48px - 4px) */
+    left: 41px; /* Центрирование на линии (45px - 4px) */
     top: 14px;
     width: 8px;
     height: 8px;
@@ -362,7 +362,7 @@ body {
 /* Маленькая кнопка "+" (для занятых слотов) */
 .small-add-btn {
     position: absolute;
-    left: 28px; /* Точно по центру под цифрами времени */
+    left: 6px; /* Идеально по центру под цифрами (36px ширина -> (36-24)/2 = 6) */
     top: 26px;
     width: 24px;
     height: 24px;
@@ -384,7 +384,7 @@ body {
 /* Контейнер для пустого слота */
 .empty-slot-content {
     position: absolute;
-    left: 63px; /* Сдвинуто влево */
+    left: 58px; /* Сдвинуто влево */
     right: 0;
     top: 22px;
     pointer-events: auto;
@@ -416,7 +416,7 @@ body {
 /* Обертка для встроенной формы */
 .inline-form-wrapper {
     position: absolute;
-    left: 63px;
+    left: 58px;
     right: 0;
     z-index: 40;
     pointer-events: auto;
@@ -492,7 +492,7 @@ body {
 
 .absolute-event-card {
     position: absolute;
-    left: 63px; /* Сдвинуто влево */
+    left: 58px; /* Сдвинуто влево */
     right: 0;
     background: var(--card-bg);
     border-radius: 14px;
@@ -501,10 +501,9 @@ body {
     border-left: 6px solid var(--dot-cyan);
     z-index: 10;
     pointer-events: auto;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    cursor: pointer;
+    overflow: hidden;
     transition: box-shadow 0.2s;
 }
 
@@ -513,11 +512,10 @@ body {
 }
 
 .event-card-header {
-    padding: 10px 12px;
+    padding: 8px 10px;
     display: flex;
-    flex-direction: column; /* Теперь элементы идут друг под другом */
-    gap: 4px;
-    flex-shrink: 0;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .event-title-row {
@@ -528,7 +526,7 @@ body {
 }
 
 .event-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     text-transform: uppercase;
     line-height: 1.3;
@@ -546,31 +544,36 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    margin-top: 4px;
 }
 
 .event-time-range {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--secondary-text);
     font-weight: 600;
 }
 
 /* Кнопка-галочка для разворачивания */
 .toggle-desc-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--secondary-text);
+    background: var(--bg-color);
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
-    transition: transform 0.2s;
+    cursor: pointer;
+    padding: 0;
+    color: var(--primary-text);
+    transition: all 0.2s;
 }
 
+.toggle-desc-btn:hover { background: var(--accent-hover); }
+
 .toggle-desc-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     transition: transform 0.2s;
 }
 
@@ -582,8 +585,8 @@ body {
     background: var(--card-bg);
     border: 1px solid var(--dark-border);
     border-radius: 50%; 
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -598,15 +601,15 @@ body {
 /* Скрытая часть карточки */
 .event-card-body {
     display: none;
-    padding: 0 12px 12px 12px;
+    padding: 0 10px 10px 10px;
     border-top: 1px dashed #cbd5e1;
-    margin-top: 4px;
+    margin-top: 6px;
     padding-top: 8px;
     background: var(--card-bg);
 }
 
 .event-card-body .event-desc {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--secondary-text);
     line-height: 1.4;
     word-break: break-word;
@@ -617,6 +620,7 @@ body {
     height: auto !important;
     z-index: 20;
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    overflow: visible; /* Позволяем контенту выходить за рамки при необходимости */
 }
 .absolute-event-card.expanded .event-card-body {
     display: block;
