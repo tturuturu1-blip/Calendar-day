@@ -1,12 +1,19 @@
 /* ==================== БАЗОВЫЕ СТИЛИ ==================== */
 :root {
-    --bg-color: #f2f5f8;
+    /* Сделали фон темнее и контрастнее */
+    --bg-color: #dce3eb; 
+    --body-bg: #aeb9c7;
     --card-bg: #ffffff;
-    --primary-text: #1c2b3a;
-    --secondary-text: #8fa3b8;
-    --accent-color: #e8edf3; 
-    --accent-hover: #d8e1eb;
-    --dark-btn: #2c3e50;
+    
+    --primary-text: #0f172a;
+    --secondary-text: #64748b;
+    --accent-color: #f1f5f9; 
+    --accent-hover: #e2e8f0;
+    
+    /* Темный контур для кнопок */
+    --dark-border: #1e293b;
+    --dark-btn: #1e293b;
+    --dark-btn-hover: #0f172a;
     
     --dot-cyan: #00b4d8;
     --dot-purple: #7209b7;
@@ -17,7 +24,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
+    background-color: var(--body-bg); /* Темный фон за пределами приложения */
     color: var(--primary-text);
     display: flex;
     justify-content: center;
@@ -59,55 +66,60 @@ body {
     gap: 6px;
 }
 
+/* Кнопки со строгой темной обводкой */
+.icon-btn {
+    background: var(--card-bg);
+    border: 2px solid var(--dark-border);
+    font-size: 20px;
+    color: var(--primary-text);
+    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px; /* Сделали чуть квадратнее */
+    transition: all 0.2s;
+    font-weight: bold;
+}
+.icon-btn:hover { background: var(--accent-hover); }
+
 .month-selector {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--accent-color);
-    padding: 8px 12px;
-    border-radius: 20px;
+    background: var(--card-bg);
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--dark-border); /* Четкая обводка */
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    border: none;
     color: var(--primary-text);
     transition: background 0.2s;
+    height: 34px;
 }
 .month-selector:hover { background: var(--accent-hover); }
 
-.icon-btn {
-    background: transparent;
-    border: none;
-    font-size: 22px;
-    color: var(--primary-text);
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-.icon-btn:hover { background: var(--accent-color); }
-
 .today-btn {
-    background: transparent;
-    border: 1px solid #d0d7e2;
-    border-radius: 12px;
-    padding: 6px 10px;
+    background: var(--card-bg);
+    border: 2px solid var(--dark-border); /* Четкая обводка */
+    border-radius: 10px;
+    padding: 0 10px;
+    height: 34px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary-text);
     cursor: pointer;
     margin-left: 4px;
     transition: all 0.2s;
 }
-.today-btn:hover { background: var(--accent-color); }
+.today-btn:hover { background: var(--accent-hover); }
 
 .add-btn-header {
     background: var(--dark-btn);
-    border: none;
+    border: 2px solid var(--dark-border);
+    color: white;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -115,9 +127,10 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
-    transition: transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.1s, background 0.2s;
 }
+.add-btn-header:hover { background: var(--dark-btn-hover); }
 .add-btn-header:active { transform: scale(0.92); }
 
 /* ==================== СЕТКА КАЛЕНДАРЯ ==================== */
@@ -126,11 +139,11 @@ body {
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--secondary-text);
     margin-bottom: 12px;
 }
-.weekdays .weekend { color: #c08484; }
+.weekdays .weekend { color: #b45c5c; }
 
 .days-grid {
     display: grid;
@@ -145,10 +158,10 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #ffffff;
-    border: 1.5px solid #e0e5ec;
+    background-color: var(--card-bg);
+    border: 2px solid #cbd5e1; /* Обводка ячеек стала контрастнее */
     border-radius: 14px; 
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
@@ -158,23 +171,38 @@ body {
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
-    color: #bcc9d6;
 }
-.day-cell.other-month .day-number { color: #bcc9d6; }
+.day-cell.other-month .day-number { color: #94a3b8; }
 
 .day-cell:hover {
-    border-color: #b0c4de;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border-color: var(--dark-border);
+    transform: translateY(-1px);
 }
+
+/* СТИЛЬ ТЕКУЩЕГО ДНЯ (Яркий контрастный контур) */
+.day-cell.today {
+    border-color: var(--dot-cyan);
+    background-color: #e0f2fe; /* Легкий голубой фон */
+    box-shadow: 0 0 0 2px var(--dot-cyan); /* Дополнительный акцент */
+}
+
+/* СТИЛЬ ВЫБРАННОГО ДНЯ */
 .day-cell.selected {
+    background-color: var(--dark-btn);
     border-color: var(--dark-btn);
-    background-color: var(--bg-color);
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
+}
+.day-cell.selected .day-number { color: white; }
+
+/* Если выбранный день совпадает с сегодняшним */
+.day-cell.selected.today {
+    border-color: var(--dot-cyan);
+    box-shadow: 0 0 0 2px var(--dot-cyan);
+    background-color: var(--dark-btn);
 }
 
 .day-number {
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary-text);
     margin-bottom: 4px;
     line-height: 1;
@@ -198,12 +226,17 @@ body {
 .dot:nth-child(2) { background-color: var(--dot-purple); }
 .dot:nth-child(3) { background-color: var(--dot-darkblue); }
 
+/* В выбранном дне точки делаем белыми для контраста */
+.day-cell.selected .dot { background-color: white; }
+
+
 /* ==================== БЛОК AGENDA ==================== */
 .agenda-section {
     background: var(--card-bg);
     border-radius: 24px;
     padding: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border: 1px solid #cbd5e1;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -215,38 +248,43 @@ body {
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
 }
 
 .today-label {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 1px;
     color: var(--secondary-text);
     text-transform: uppercase;
 }
 .date-large {
     font-size: 28px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.1;
 }
 .agenda-summary {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
+    gap: 6px;
     font-size: 12px;
+    font-weight: 600;
     color: var(--secondary-text);
 }
+
 .view-all-btn {
-    background: var(--dark-btn);
-    color: white;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
+    background: var(--card-bg);
+    color: var(--primary-text);
+    border: 2px solid var(--dark-border); /* Контурная кнопка */
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
+    transition: background 0.2s;
 }
+.view-all-btn:hover { background: var(--accent-color); }
 
 .agenda-list {
     display: flex;
@@ -257,6 +295,7 @@ body {
 
 .event-card {
     background: var(--accent-color);
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 12px 14px;
     display: flex;
@@ -264,15 +303,15 @@ body {
     gap: 4px;
     position: relative;
 }
-.event-card .time { font-size: 12px; font-weight: 500; }
-.event-card .title { font-size: 14px; font-weight: 600; text-transform: uppercase; }
+.event-card .time { font-size: 12px; font-weight: 600; }
+.event-card .title { font-size: 14px; font-weight: 700; text-transform: uppercase; }
 .event-card .delete-btn {
     position: absolute;
     top: 10px;
     right: 10px;
     background: transparent;
     border: none;
-    color: var(--secondary-text);
+    color: #ef4444;
     cursor: pointer;
     padding: 4px;
 }
@@ -280,7 +319,8 @@ body {
 .empty-state {
     text-align: center;
     color: var(--secondary-text);
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     margin-top: 20px;
 }
 
@@ -290,26 +330,36 @@ body {
     z-index: 10;
 }
 .back-btn {
-    background: transparent;
-    border: none;
+    background: var(--card-bg);
+    border: 2px solid var(--dark-border);
     cursor: pointer;
-    padding: 8px;
-    margin-left: -8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .day-title h2 { font-size: 18px; margin-bottom: 2px; }
-.day-title span { font-size: 12px; color: var(--secondary-text); }
+.day-title span { font-size: 13px; font-weight: 600; color: var(--secondary-text); }
 .day-nav { display: flex; gap: 8px; }
+
 .day-nav button {
     background: var(--card-bg);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    border: 2px solid var(--dark-border); /* Контур */
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     font-size: 20px;
+    font-weight: bold;
     line-height: 1;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
 }
+.day-nav button:hover { background: var(--accent-hover); }
 
 .timeline-wrapper {
     flex-grow: 1;
@@ -317,7 +367,8 @@ body {
     background: var(--card-bg);
     border-radius: 24px;
     padding: 10px 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border: 1px solid #cbd5e1;
 }
 
 .hour-row {
@@ -329,19 +380,19 @@ body {
     font-size: 12px;
     color: var(--secondary-text);
     padding-top: 8px;
-    font-weight: 500;
+    font-weight: 700;
     flex-shrink: 0;
 }
 .slots-container {
     flex-grow: 1;
-    border-left: 2px solid var(--bg-color);
+    border-left: 2px solid #cbd5e1;
     padding-left: 10px;
     display: flex;
     flex-direction: column;
 }
 .slot {
     flex: 1;
-    border-bottom: 1px dashed var(--accent-color);
+    border-bottom: 1px dashed #cbd5e1;
     padding: 4px 0;
     min-height: 30px;
     cursor: pointer;
@@ -350,14 +401,14 @@ body {
     position: relative;
 }
 .slot:last-child { border-bottom: none; }
-.slot:hover { background: #f8fafc; }
+.slot:hover { background: var(--bg-color); }
 .slot .event-card { margin: 2px 0; padding: 6px 10px; }
 
 /* ==================== МОДАЛЬНЫЕ ОКНА ==================== */
 .modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(15, 23, 42, 0.6); /* Темнее фон подложки */
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -379,6 +430,7 @@ body {
     padding: 24px;
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+    border-top: 2px solid var(--dark-border);
 }
 .modal-overlay.active .modal-content {
     transform: translateY(0);
@@ -389,44 +441,58 @@ body {
     align-items: center;
     margin-bottom: 20px;
 }
-.modal-header h3 { font-size: 18px; }
+.modal-header h3 { font-size: 18px; font-weight: 700; }
 .close-modal-btn {
-    background: none; border: none; font-size: 24px; color: var(--secondary-text); cursor: pointer;
+    background: var(--accent-color);
+    border: 2px solid var(--dark-border);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary-text);
+    cursor: pointer;
 }
 
-/* Поля ввода */
 .input-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
 .input-row { display: flex; gap: 12px; }
 .input-row .input-group { flex: 1; }
-.input-group label { font-size: 12px; font-weight: 600; color: var(--secondary-text); }
+.input-group label { font-size: 12px; font-weight: 700; color: var(--secondary-text); }
 .input-group input, .input-group textarea {
     width: 100%;
     background: var(--accent-color);
-    border: 1px solid transparent;
+    border: 2px solid #cbd5e1; /* Более плотная рамка */
     border-radius: 12px;
     padding: 12px;
     font-size: 14px;
     font-family: inherit;
+    font-weight: 500;
     outline: none;
     transition: border 0.2s;
 }
 .input-group input:focus, .input-group textarea:focus {
-    border-color: var(--secondary-text);
+    border-color: var(--dark-border);
     background: white;
 }
 .input-group textarea { resize: none; height: 80px; }
+
 .submit-btn {
     width: 100%;
     background: var(--dark-btn);
     color: white;
-    border: none;
+    border: 2px solid var(--dark-border);
     border-radius: 12px;
     padding: 14px;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     margin-top: 10px;
+    transition: background 0.2s;
 }
+.submit-btn:hover { background: var(--dark-btn-hover); }
 
 /* Выбор месяца/года */
 .picker-year-nav {
@@ -436,7 +502,7 @@ body {
     gap: 20px;
     margin-bottom: 20px;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 800;
 }
 .picker-months-grid {
     display: grid;
@@ -445,34 +511,36 @@ body {
     margin-bottom: 20px;
 }
 .picker-month-item {
-    background: var(--accent-color);
-    border: none;
+    background: var(--card-bg);
+    border: 2px solid var(--dark-border); /* Контурная кнопка */
     padding: 12px;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
 }
-.picker-month-item:hover { background: var(--accent-hover); }
+.picker-month-item:hover { background: var(--accent-color); }
 .picker-month-item.active {
     background: var(--dark-btn);
     color: white;
+    border-color: var(--dark-border);
 }
 .picker-jump-section {
-    border-top: 1px solid var(--accent-color);
+    border-top: 2px solid var(--accent-color);
     padding-top: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
-.picker-jump-section label { font-size: 13px; color: var(--secondary-text); font-weight: 500; }
+.picker-jump-section label { font-size: 13px; color: var(--secondary-text); font-weight: 700; }
 .picker-jump-section input {
     width: 100%;
     padding: 12px;
     background: var(--accent-color);
-    border: 1px solid transparent;
+    border: 2px solid #cbd5e1;
     border-radius: 12px;
     font-family: inherit;
     font-size: 14px;
+    font-weight: 600;
 }
