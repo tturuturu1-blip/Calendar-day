@@ -231,7 +231,7 @@ function renderAgenda() {
 
     timelineWrapper.innerHTML = timelineHtml;
 
-    // Скроллим весь блок scheduleSection к нужному часу
+    // Скроллим весь блок scheduleSection к нужному часу с учетом закрепленной шапки
     setTimeout(() => {
         const now = new Date();
         let scrollHour = 8;
@@ -243,14 +243,17 @@ function renderAgenda() {
         
         const targetSlot = timelineWrapper.children[scrollHour * 2];
         if (targetSlot) {
-            const headerOffset = 100; // Примерная высота заголовка "13 Понедельник"
-            scheduleSection.scrollTop = targetSlot.offsetTop - headerOffset;
+            // Вычисляем высоту закрепленной шапки, чтобы прокрутить ровно под ней
+            const stickyHeader = document.querySelector('.agenda-header');
+            const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
+            
+            scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 5;
         }
     }, 50);
 }
 
 function renderTimelineCard(ev, dateKey) {
-    const endTime = ev.endTime || addHourToTime(ev.time); // Фоллбэк для старых записей
+    const endTime = ev.endTime || addHourToTime(ev.time); 
     return `
         <div class="timeline-card">
             <div class="event-actions">
@@ -296,7 +299,6 @@ window.saveInlineEvent = (dateKey, timeStr) => {
         return;
     }
     
-    // Добавляем событие длительностью 1 час
     const endTime = addHourToTime(timeStr);
     
     if (!events[dateKey]) events[dateKey] = [];
@@ -316,7 +318,6 @@ window.saveInlineEvent = (dateKey, timeStr) => {
 };
 
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
-// Кнопка "+" в шапке теперь вызывает модальное окно
 document.getElementById('addBtn').addEventListener('click', () => {
     editingEventInfo = null;
     modalTitle.textContent = 'Новое событие';
@@ -341,7 +342,6 @@ window.editEvent = (dateKey, id) => {
     evTitle.value = ev.title;
     evDate.value = dateKey;
     evTime.value = ev.time;
-    // Если endTime нет, ставим +1 час
     evEndTime.value = ev.endTime || addHourToTime(ev.time); 
     evDesc.value = ev.desc || '';
     
