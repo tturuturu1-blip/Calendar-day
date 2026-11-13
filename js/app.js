@@ -57,7 +57,6 @@ const selectedDateLarge = document.getElementById('selectedDateLarge');
 const agendaDateLabel = document.getElementById('agendaDateLabel');
 const eventSummary = document.getElementById('eventSummary');
 const timelineWrapper = document.getElementById('timelineWrapper');
-const horizontalDates = document.getElementById('horizontalDates');
 
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');
@@ -131,14 +130,14 @@ function renderMonth() {
     
     daysGrid.innerHTML = daysHtml;
     
-    // Обработчик клика по дате (обновляет только расписание, никуда не переходит)
+    // Обработчик клика по дате (обновляет только расписание)
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
             
             renderMonth(); 
-            renderAgenda(); // Перерисовываем расписание
+            renderAgenda();
         });
     });
 }
@@ -153,7 +152,7 @@ function renderAgenda() {
     if (key === todayKey) {
         agendaDateLabel.textContent = 'СЕГОДНЯ';
     } else {
-        agendaDateLabel.textContent = WEEKDAYS_SHORT[selectedDate.getDay()]; // Например, "ПТ"
+        agendaDateLabel.textContent = WEEKDAYS_SHORT[selectedDate.getDay()];
     }
 
     const dayEvents = events[key] || [];
@@ -166,29 +165,7 @@ function renderAgenda() {
     else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
     eventSummary.textContent = `${count} ${eventWord}`;
 
-    // 1. Горизонтальная лента дат (на неделю)
-    let dateStripHtml = '';
-    const startOfWeek = new Date(selectedDate);
-    const dayOfWeek = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
-    startOfWeek.setDate(diff); // Понедельник
-
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(startOfWeek);
-        d.setDate(startOfWeek.getDate() + i);
-        const dKey = formatDateKey(d);
-        const isSelected = dKey === key;
-        
-        dateStripHtml += `
-            <div class="date-pill ${isSelected ? 'active' : ''}" onclick="selectDate('${dKey}')">
-                <span class="pill-day">${d.getDate()}</span>
-                <span class="pill-weekday">${WEEKDAYS_SHORT[d.getDay()]}</span>
-            </div>
-        `;
-    }
-    horizontalDates.innerHTML = dateStripHtml;
-
-    // 2. Вертикальный таймлайн (каждые полчаса)
+    // Вертикальный таймлайн (каждые полчаса)
     let timelineHtml = '';
     
     // Группируем события по получасовым слотам
@@ -235,15 +212,7 @@ function renderAgenda() {
     }, 50);
 }
 
-// Функция для выбора даты из горизонтальной ленты
-window.selectDate = (key) => {
-    const [y, m, d] = key.split('-');
-    selectedDate = new Date(y, m - 1, d);
-    renderMonth();
-    renderAgenda();
-};
-
-// Шаблон карточки события (как на референсе)
+// Шаблон карточки события
 function renderTimelineCard(ev, dateKey) {
     const endTime = addHourToTime(ev.time);
     return `
@@ -417,7 +386,7 @@ eventForm.addEventListener('submit', (e) => {
     saveData(events);
     closeModal();
     
-    // Синхронизируем дату, если она изменилась
+    // Синхронизируем дату
     selectedDate = new Date(newDateKey + 'T00:00:00'); 
     currentDate = new Date(selectedDate);
     
