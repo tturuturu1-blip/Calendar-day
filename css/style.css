@@ -27,8 +27,8 @@ body {
     display: flex;
     justify-content: center;
     height: 100vh;
-    height: 100dvh; /* Жестко фиксируем высоту для мобильных браузеров */
-    overflow: hidden; /* Отключаем скролл самой страницы */
+    height: 100dvh;
+    overflow: hidden;
 }
 
 .app-container {
@@ -45,7 +45,7 @@ body {
 .view {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Контейнер занимает все доступное пространство */
+    flex-grow: 1;
     padding: 0 20px;
     overflow: hidden;
 }
@@ -231,7 +231,7 @@ body {
     box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
     border-bottom: none;
-    flex-grow: 1; /* Растягиваем карточку до самого низа */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -241,7 +241,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px; /* Увеличили отступ, так как убрали ленту дат */
     flex-shrink: 0;
 }
 
@@ -262,41 +262,6 @@ body {
     font-weight: 600;
     color: var(--secondary-text);
 }
-
-/* Горизонтальная лента с датами */
-.horizontal-dates {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    margin-bottom: 8px;
-    scrollbar-width: none; 
-    flex-shrink: 0;
-}
-.horizontal-dates::-webkit-scrollbar { display: none; }
-
-.date-pill {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    height: 64px;
-    border-radius: 14px;
-    border: 1px solid #cbd5e1;
-    background: var(--card-bg);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.date-pill .pill-day { font-size: 15px; font-weight: 700; }
-.date-pill .pill-weekday { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 2px; color: var(--secondary-text); }
-
-.date-pill.active {
-    background: var(--dark-btn);
-    border-color: var(--dark-border);
-}
-.date-pill.active .pill-day { color: white; }
-.date-pill.active .pill-weekday { color: #cbd5e1; }
 
 /* Таймлайн (Скроллируемая область) */
 .timeline-wrapper {
