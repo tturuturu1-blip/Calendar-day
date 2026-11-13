@@ -11,34 +11,36 @@
 <body>
     <div class="app-container">
         
-        <!-- ==================== ЕДИНЫЙ ЭКРАН: КАЛЕНДАРЬ + РАСПИСАНИЕ ==================== -->
+        <!-- ==================== ЭКРАН: КАЛЕНДАРЬ + РАСПИСАНИЕ ==================== -->
         <section class="view active">
-            <!-- Закрепленная шапка -->
-            <header class="app-header">
-                <div class="header-left">
-                    <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
-                    <button class="month-selector" id="monthPickerBtn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span id="monthTitle">Ноябрь</span>
-                    </button>
-                    <button class="icon-btn" id="nextMonthBtn" title="Следующий месяц">›</button>
-                    <button class="today-btn" id="todayBtn" title="Перейти к сегодня">Сегодня</button>
-                </div>
-                <div class="header-right">
-                    <button class="add-btn-header" id="addBtn" title="Добавить событие">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                </div>
-            </header>
+            
+            <!-- ФИКСИРОВАННАЯ ВЕРХНЯЯ ЧАСТЬ (Календарь) -->
+            <div class="calendar-fixed-part">
+                <header class="app-header">
+                    <div class="header-left">
+                        <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
+                        <button class="month-selector" id="monthPickerBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <span id="monthTitle">Ноябрь</span>
+                        </button>
+                        <button class="icon-btn" id="nextMonthBtn" title="Следующий месяц">›</button>
+                        <button class="today-btn" id="todayBtn" title="Перейти к сегодня">Сегодня</button>
+                    </div>
+                    <div class="header-right">
+                        <button class="add-btn-header" id="addBtn" title="Добавить событие">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+                </header>
 
-            <!-- Сетка календаря (отображает либо месяц, либо неделю) -->
-            <div class="weekdays" id="weekdaysHeader">
-                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
+                <div class="weekdays" id="weekdaysHeader">
+                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
+                </div>
+                <div class="days-grid" id="daysGrid"></div>
             </div>
-            <div class="days-grid" id="daysGrid"></div>
 
-            <!-- Карточка с расписанием на выбранный день -->
-            <div class="agenda-section">
+            <!-- ПРОКРУЧИВАЕМАЯ НИЖНЯЯ ЧАСТЬ (Расписание) -->
+            <div class="schedule-section" id="scheduleSection">
                 <div class="agenda-header">
                     <div class="date-info">
                         <div class="date-large" id="selectedDateLarge">13</div>
@@ -59,11 +61,11 @@
 
     </div>
 
-    <!-- Модальное окно (для редактирования событий) -->
+    <!-- Модальное окно добавления/редактирования -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Редактировать событие</h3>
+                <h3 id="modalTitle">Новое событие</h3>
                 <button class="close-modal-btn" id="closeModalBtn">&times;</button>
             </div>
             <form id="eventForm">
@@ -71,14 +73,18 @@
                     <label>Название</label>
                     <input type="text" id="evTitle" required placeholder="Например: Встреча">
                 </div>
+                <div class="input-group">
+                    <label>Дата</label>
+                    <input type="date" id="evDate" required>
+                </div>
                 <div class="input-row">
                     <div class="input-group">
-                        <label>Дата</label>
-                        <input type="date" id="evDate" required>
+                        <label>Время начала</label>
+                        <input type="time" id="evTime" required>
                     </div>
                     <div class="input-group">
-                        <label>Время</label>
-                        <input type="time" id="evTime" required>
+                        <label>Время окончания</label>
+                        <input type="time" id="evEndTime" required>
                     </div>
                 </div>
                 <div class="input-group">
@@ -97,15 +103,12 @@
                 <h3>Выбор месяца</h3>
                 <button class="close-modal-btn" id="closeMonthPickerBtn">&times;</button>
             </div>
-            
             <div class="picker-year-nav">
                 <button class="icon-btn" id="pickerPrevYear">‹</button>
                 <span id="pickerYearLabel">2024</span>
                 <button class="icon-btn" id="pickerNextYear">›</button>
             </div>
-
             <div class="picker-months-grid" id="pickerMonthsGrid"></div>
-
             <div class="picker-jump-section">
                 <label>Или перейти к конкретному дню:</label>
                 <input type="date" id="jumpToDateInput">
