@@ -1,6 +1,6 @@
 /* ==================== БАЗОВЫЕ СТИЛИ ==================== */
 :root {
-    /* Сделали фон темнее и контрастнее */
+    /* Темный и контрастный фон */
     --bg-color: #dce3eb; 
     --body-bg: #aeb9c7;
     --card-bg: #ffffff;
@@ -24,7 +24,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--body-bg); /* Темный фон за пределами приложения */
+    background-color: var(--body-bg);
     color: var(--primary-text);
     display: flex;
     justify-content: center;
@@ -66,10 +66,10 @@ body {
     gap: 6px;
 }
 
-/* Кнопки со строгой темной обводкой */
+/* Тонкие (1px) обводки для всех кнопок */
 .icon-btn {
     background: var(--card-bg);
-    border: 2px solid var(--dark-border);
+    border: 1px solid var(--dark-border);
     font-size: 20px;
     color: var(--primary-text);
     cursor: pointer;
@@ -78,7 +78,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px; /* Сделали чуть квадратнее */
+    border-radius: 10px;
     transition: all 0.2s;
     font-weight: bold;
 }
@@ -91,7 +91,7 @@ body {
     background: var(--card-bg);
     padding: 6px 12px;
     border-radius: 10px;
-    border: 2px solid var(--dark-border); /* Четкая обводка */
+    border: 1px solid var(--dark-border);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -103,7 +103,7 @@ body {
 
 .today-btn {
     background: var(--card-bg);
-    border: 2px solid var(--dark-border); /* Четкая обводка */
+    border: 1px solid var(--dark-border);
     border-radius: 10px;
     padding: 0 10px;
     height: 34px;
@@ -118,7 +118,7 @@ body {
 
 .add-btn-header {
     background: var(--dark-btn);
-    border: 2px solid var(--dark-border);
+    border: 1px solid var(--dark-border);
     color: white;
     width: 40px;
     height: 40px;
@@ -127,7 +127,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     transition: transform 0.1s, background 0.2s;
 }
 .add-btn-header:hover { background: var(--dark-btn-hover); }
@@ -152,6 +152,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* Обводка для дней текущего месяца (тонкая, но заметная) */
 .day-cell {
     aspect-ratio: 1 / 1.15; 
     display: flex;
@@ -159,14 +160,15 @@ body {
     justify-content: center;
     align-items: center;
     background-color: var(--card-bg);
-    border: 2px solid #cbd5e1; /* Обводка ячеек стала контрастнее */
+    border: 1px solid #94a3b8; /* Обводка дней текущего месяца */
     border-radius: 14px; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
 }
 
+/* Для дней других месяцев обводку убираем */
 .day-cell.other-month {
     background-color: transparent;
     border-color: transparent;
@@ -179,24 +181,24 @@ body {
     transform: translateY(-1px);
 }
 
-/* СТИЛЬ ТЕКУЩЕГО ДНЯ (Яркий контрастный контур) */
+/* ТЕКУЩИЙ ДЕНЬ (Яркий тонкий контур) */
 .day-cell.today {
-    border-color: var(--dot-cyan);
-    background-color: #e0f2fe; /* Легкий голубой фон */
-    box-shadow: 0 0 0 2px var(--dot-cyan); /* Дополнительный акцент */
+    border: 1px solid var(--dot-cyan);
+    background-color: #e0f2fe;
+    box-shadow: 0 0 0 1px var(--dot-cyan); /* Тонкое свечение вместо толстой обводки */
 }
 
-/* СТИЛЬ ВЫБРАННОГО ДНЯ */
+/* ВЫБРАННЫЙ ДЕНЬ */
 .day-cell.selected {
     background-color: var(--dark-btn);
-    border-color: var(--dark-btn);
+    border-color: var(--dark-border);
 }
 .day-cell.selected .day-number { color: white; }
 
 /* Если выбранный день совпадает с сегодняшним */
 .day-cell.selected.today {
-    border-color: var(--dot-cyan);
-    box-shadow: 0 0 0 2px var(--dot-cyan);
+    border: 1px solid var(--dot-cyan);
+    box-shadow: 0 0 0 1px var(--dot-cyan);
     background-color: var(--dark-btn);
 }
 
@@ -235,7 +237,7 @@ body {
     background: var(--card-bg);
     border-radius: 24px;
     padding: 20px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
     flex-grow: 1;
     display: flex;
@@ -248,7 +250,7 @@ body {
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 2px solid var(--accent-color);
+    border-bottom: 1px solid var(--accent-color);
 }
 
 .today-label {
@@ -276,7 +278,7 @@ body {
 .view-all-btn {
     background: var(--card-bg);
     color: var(--primary-text);
-    border: 2px solid var(--dark-border); /* Контурная кнопка */
+    border: 1px solid var(--dark-border);
     padding: 4px 12px;
     border-radius: 8px;
     font-size: 12px;
@@ -331,7 +333,7 @@ body {
 }
 .back-btn {
     background: var(--card-bg);
-    border: 2px solid var(--dark-border);
+    border: 1px solid var(--dark-border);
     cursor: pointer;
     width: 34px;
     height: 34px;
@@ -346,7 +348,7 @@ body {
 
 .day-nav button {
     background: var(--card-bg);
-    border: 2px solid var(--dark-border); /* Контур */
+    border: 1px solid var(--dark-border);
     width: 34px;
     height: 34px;
     border-radius: 10px;
@@ -367,7 +369,7 @@ body {
     background: var(--card-bg);
     border-radius: 24px;
     padding: 10px 15px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
 }
 
@@ -385,7 +387,7 @@ body {
 }
 .slots-container {
     flex-grow: 1;
-    border-left: 2px solid #cbd5e1;
+    border-left: 1px solid #cbd5e1;
     padding-left: 10px;
     display: flex;
     flex-direction: column;
@@ -408,7 +410,7 @@ body {
 .modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(15, 23, 42, 0.6); /* Темнее фон подложки */
+    background: rgba(15, 23, 42, 0.6);
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -430,7 +432,7 @@ body {
     padding: 24px;
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
-    border-top: 2px solid var(--dark-border);
+    border-top: 1px solid var(--dark-border);
 }
 .modal-overlay.active .modal-content {
     transform: translateY(0);
@@ -444,7 +446,7 @@ body {
 .modal-header h3 { font-size: 18px; font-weight: 700; }
 .close-modal-btn {
     background: var(--accent-color);
-    border: 2px solid var(--dark-border);
+    border: 1px solid var(--dark-border);
     border-radius: 50%;
     width: 30px;
     height: 30px;
@@ -464,7 +466,7 @@ body {
 .input-group input, .input-group textarea {
     width: 100%;
     background: var(--accent-color);
-    border: 2px solid #cbd5e1; /* Более плотная рамка */
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 12px;
     font-size: 14px;
@@ -483,7 +485,7 @@ body {
     width: 100%;
     background: var(--dark-btn);
     color: white;
-    border: 2px solid var(--dark-border);
+    border: 1px solid var(--dark-border);
     border-radius: 12px;
     padding: 14px;
     font-size: 15px;
@@ -512,7 +514,7 @@ body {
 }
 .picker-month-item {
     background: var(--card-bg);
-    border: 2px solid var(--dark-border); /* Контурная кнопка */
+    border: 1px solid var(--dark-border);
     padding: 12px;
     border-radius: 12px;
     font-size: 14px;
@@ -527,7 +529,7 @@ body {
     border-color: var(--dark-border);
 }
 .picker-jump-section {
-    border-top: 2px solid var(--accent-color);
+    border-top: 1px solid var(--accent-color);
     padding-top: 16px;
     display: flex;
     flex-direction: column;
@@ -538,9 +540,13 @@ body {
     width: 100%;
     padding: 12px;
     background: var(--accent-color);
-    border: 2px solid #cbd5e1;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
+    outline: none;
+}
+.picker-jump-section input:focus {
+    border-color: var(--dark-border);
 }
