@@ -13,8 +13,8 @@
         
         <!-- ==================== ЭКРАН 1: МЕСЯЦ ==================== -->
         <section id="monthView" class="view active">
+            <!-- Шапка закреплена (sticky) -->
             <header class="app-header">
-                <!-- Левая часть: Навигация по месяцам -->
                 <div class="header-left">
                     <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
                     <button class="month-selector" id="monthPickerBtn">
@@ -24,10 +24,9 @@
                     <button class="icon-btn" id="nextMonthBtn" title="Следующий месяц">›</button>
                     <button class="today-btn" id="todayBtn" title="Перейти к сегодня">Сегодня</button>
                 </div>
-                <!-- Правая часть: Кнопка добавления -->
                 <div class="header-right">
                     <button class="add-btn-header" id="addBtn" title="Добавить событие">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
             </header>
@@ -38,7 +37,6 @@
             
             <div class="days-grid" id="daysGrid"></div>
 
-            <!-- Нижняя панель с расписанием на выбранный день -->
             <div class="agenda-section">
                 <div class="agenda-header">
                     <div>
@@ -69,17 +67,16 @@
                     <button id="nextDayBtn">›</button>
                 </div>
             </header>
-
             <div class="timeline-wrapper" id="timelineWrapper"></div>
         </section>
 
     </div>
 
-    <!-- Модальное окно: ДОБАВЛЕНИЕ СОБЫТИЯ -->
+    <!-- Модальное окно: ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ СОБЫТИЯ -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Новое событие</h3>
+                <h3 id="modalTitle">Новое событие</h3>
                 <button class="close-modal-btn" id="closeModalBtn">&times;</button>
             </div>
             <form id="eventForm">
@@ -120,9 +117,7 @@
                 <button class="icon-btn" id="pickerNextYear">›</button>
             </div>
 
-            <div class="picker-months-grid" id="pickerMonthsGrid">
-                <!-- Месяцы генерируются через JS -->
-            </div>
+            <div class="picker-months-grid" id="pickerMonthsGrid"></div>
 
             <div class="picker-jump-section">
                 <label>Или перейти к конкретному дню:</label>
