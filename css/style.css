@@ -58,7 +58,6 @@ body {
     padding: 0 20px 5px 20px;
     background-color: var(--bg-color);
     z-index: 10;
-    /* Разделительная линия между календарем и расписанием */
     border-bottom: 2px solid #cbd5e1; 
 }
 
@@ -227,14 +226,13 @@ body {
     position: relative;
 }
 
-/* Закрепленная шапка расписания */
 .agenda-header {
     position: sticky;
     top: 0;
     z-index: 20;
     background-color: var(--bg-color);
     padding: 15px 20px;
-    margin: 0 -20px; /* Растягиваем фон на всю ширину */
+    margin: 0 -20px; 
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -293,12 +291,18 @@ body {
     min-height: 80px;
     position: relative;
     align-items: stretch; 
-    /* Горизонтальная разделительная линия напротив точки */
-    border-bottom: 1px dashed #cbd5e1; 
+    /* Убрали нижнюю границу, чтобы линия шла строго через точки */
 }
 
-.hour-slot:last-child {
-    border-bottom: none; /* Убираем лишнюю линию в самом низу */
+/* Разделительная горизонтальная линия, выходящая из точки */
+.hour-slot::before {
+    content: '';
+    position: absolute;
+    left: 55px; /* Начинается ровно от вертикальной линии */
+    right: 0;
+    top: 12px; /* Выровнено строго по центру точки */
+    border-top: 1px dashed #000000; /* Черная линия */
+    z-index: 1;
 }
 
 /* Метка времени слева */
@@ -307,39 +311,43 @@ body {
     flex-shrink: 0;
     font-size: 12px;
     font-weight: 700;
-    color: var(--secondary-text);
+    color: #000000; /* Черный цвет времени */
     text-align: right;
     padding-right: 12px;
     padding-top: 6px;
     position: relative;
 }
 
+/* Точка на линии */
 .time-label::after {
     content: '';
     position: absolute;
     right: -5px;
-    top: 8px;
+    top: 8px; /* Центр точки (8px + 4px радиус = 12px) */
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #cbd5e1;
+    background: #000000; /* Черная точка */
     z-index: 2;
 }
 
-/* Правая часть (линия и контент) */
+/* Правая часть (вертикальная линия и контент) */
 .slot-content {
     flex-grow: 1;
-    border-left: 2px solid #cbd5e1;
+    border-left: 2px solid #000000; /* Черная вертикальная линия */
     padding-left: 16px;
-    padding-bottom: 10px;
+    padding-top: 24px; /* Опускаем контент ниже, чтобы был отступ от горизонтальной линии */
+    padding-bottom: 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
+    z-index: 2;
 }
 
 /* Кнопка "Добавить событие" */
 .add-slot-btn {
-    background: transparent;
+    background: var(--bg-color); /* Добавили фон, чтобы линия не просвечивала */
     border: 2px dashed #cbd5e1;
     border-radius: 12px;
     padding: 12px;
@@ -432,7 +440,7 @@ body {
     border: 1px solid #cbd5e1;
     border-left: 6px solid var(--dot-cyan);
     position: relative;
-    z-index: 1; /* Чтобы карточка перекрывала горизонтальную линию */
+    z-index: 2;
 }
 
 .timeline-card .event-title {
