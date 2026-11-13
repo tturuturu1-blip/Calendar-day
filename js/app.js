@@ -23,9 +23,9 @@ function saveData(data) {
 
 // ==================== СОСТОЯНИЕ ====================
 let events = loadData();
-let currentDate = new Date();   // Дата для отрисовки сетки календаря
-let selectedDate = new Date();  // Выбранная дата (для списка событий)
-let pickerDate = new Date();    // Дата для модального окна выбора месяца
+let currentDate = new Date();
+let selectedDate = new Date();
+let pickerDate = new Date();
 
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
@@ -55,7 +55,6 @@ const dayTitle = document.getElementById('dayTitle');
 const daySub = document.getElementById('daySub');
 const timelineWrapper = document.getElementById('timelineWrapper');
 
-// Модалки
 const modal = document.getElementById('modal');
 const eventForm = document.getElementById('eventForm');
 const evTitle = document.getElementById('evTitle');
@@ -88,7 +87,7 @@ function renderMonth() {
     }
     
     // Дни текущего месяца
-    const todayKey = formatDateKey(new Date());
+    const todayKey = formatDateKey(new Date()); // Ключ текущего дня
     const selectedKey = formatDateKey(selectedDate);
     
     for (let i = 1; i <= lastDay.getDate(); i++) {
@@ -96,6 +95,10 @@ function renderMonth() {
         const key = formatDateKey(d);
         
         let classes = 'day-cell';
+        
+        // Добавляем класс для текущего дня
+        if (key === todayKey) classes += ' today';
+        // Добавляем класс для выбранного дня
         if (key === selectedKey) classes += ' selected';
         
         const dayEvents = events[key] || [];
@@ -126,7 +129,7 @@ function renderMonth() {
     
     daysGrid.innerHTML = daysHtml;
     
-    // Обработчик клика по дате (переход на экран дня)
+    // Обработчик клика по дате
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
@@ -237,7 +240,7 @@ function renderTimelineEvent(ev, dateKey) {
     `;
 }
 
-// ==================== МОДАЛЬНОЕ ОКНО СОБЫТИЙ ====================
+// ==================== МОДАЛЬНЫЕ ОКНА ====================
 function openModal(dateKey, time) {
     evTitle.value = '';
     evDesc.value = '';
@@ -263,9 +266,9 @@ window.deleteEvent = (dateKey, id) => {
     }
 };
 
-// ==================== МОДАЛЬНОЕ ОКНО ВЫБОРА МЕСЯЦА ====================
+// ==================== ВЫБОР МЕСЯЦА ====================
 function openMonthPicker() {
-    pickerDate = new Date(currentDate); // Синхронизируем с текущим видом
+    pickerDate = new Date(currentDate); 
     updateMonthPickerUI();
     monthPickerModal.classList.add('active');
 }
@@ -289,14 +292,12 @@ function updateMonthPickerUI() {
         pickerMonthsGrid.appendChild(btn);
     });
 
-    // Устанавливаем текущую дату в input
     jumpToDateInput.value = formatDateKey(pickerDate);
 }
 
 function closeMonthPicker() { monthPickerModal.classList.remove('active'); }
 
 // ==================== ОБРАБОТЧИКИ ====================
-// Кнопки навигации по месяцам
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderMonth();
@@ -306,7 +307,6 @@ document.getElementById('nextMonthBtn').addEventListener('click', () => {
     renderMonth();
 });
 
-// Кнопка "Сегодня"
 document.getElementById('todayBtn').addEventListener('click', () => {
     const now = new Date();
     currentDate = new Date(now);
@@ -315,12 +315,10 @@ document.getElementById('todayBtn').addEventListener('click', () => {
     renderAgenda();
 });
 
-// Кнопка "Добавить" в шапке
 document.getElementById('addBtn').addEventListener('click', () => {
     openModal(formatDateKey(selectedDate), '09:00');
 });
 
-// Выбор месяца
 document.getElementById('monthPickerBtn').addEventListener('click', openMonthPicker);
 document.getElementById('closeMonthPickerBtn').addEventListener('click', closeMonthPicker);
 document.getElementById('pickerPrevYear').addEventListener('click', () => {
@@ -332,7 +330,6 @@ document.getElementById('pickerNextYear').addEventListener('click', () => {
     updateMonthPickerUI();
 });
 
-// Переход к конкретному дню через input
 jumpToDateInput.addEventListener('change', (e) => {
     const val = e.target.value;
     if (!val) return;
@@ -345,24 +342,20 @@ jumpToDateInput.addEventListener('change', (e) => {
     closeMonthPicker();
 });
 
-// Кнопка перехода на расписание дня (Все)
 document.getElementById('goToDayBtn').addEventListener('click', () => {
     monthView.classList.remove('active');
     dayView.classList.add('active');
     renderDayView();
 });
 
-// Назад к календарю
 document.getElementById('backBtn').addEventListener('click', () => {
     dayView.classList.remove('active');
     monthView.classList.add('active');
-    // При возврате синхронизируем месяц календаря с выбранной датой
     currentDate = new Date(selectedDate);
     renderMonth();
     renderAgenda();
 });
 
-// Навигация по дням внутри расписания
 document.getElementById('prevDayBtn').addEventListener('click', () => {
     selectedDate.setDate(selectedDate.getDate() - 1);
     currentDate = new Date(selectedDate);
@@ -374,12 +367,10 @@ document.getElementById('nextDayBtn').addEventListener('click', () => {
     renderDayView();
 });
 
-// Закрытие модалок
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 monthPickerModal.addEventListener('click', (e) => { if (e.target === monthPickerModal) closeMonthPicker(); });
 
-// Сохранение события
 eventForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const key = evDate.value;
