@@ -112,19 +112,26 @@
     position: relative;
     min-height: 72px;
     background: #f8fafc;
-    border: 1px solid transparent;
-    border-radius: 10px;
+    /* Обводка дат: толще, ярче и более круглая */
+    border: 2px solid #b9c9e6;
+    border-radius: 18px;
     padding: 6px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    transition: background .15s, border-color .15s, transform .1s;
+    transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
   }
-  .day:hover { background: #e8eefb; border-color: #b9cdf6; transform: translateY(-1px); }
-  .day.other { opacity: .38; }
+  .day:hover {
+    background: #e8eefb;
+    border-color: #6a8fe6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59,111,224,.18);
+  }
+  .day.other { opacity: .45; }
   .day.today {
     border-color: #3b6fe0;
     background: #eaf0fe;
+    box-shadow: 0 0 0 3px rgba(59,111,224,.18);
   }
   .day .num {
     font-size: 14px;
@@ -176,7 +183,8 @@
   .timeline-wrap {
     max-height: 62vh;
     overflow-y: auto;
-    border: 1px solid #e5e9f0;
+    /* Более яркая рамка контейнера */
+    border: 2px solid #c2cfe4;
     border-radius: 12px;
     background: #fff;
   }
@@ -197,8 +205,9 @@
     text-align: right;
     padding-right: 8px;
     font-size: 12px;
-    font-weight: 600;
-    color: #8a94a6;
+    font-weight: 700;
+    /* Чуть контрастнее подписи часов */
+    color: #6b7a90;
     transform: translateY(-7px);
     user-select: none;
   }
@@ -206,17 +215,19 @@
   .hour-slots {
     flex: 1;
     min-width: 0;
-    border-top: 1px solid #e8ecf3;
+    /* Яркая линия между часами */
+    border-top: 2px solid #c7d3e6;
   }
 
   .hour-row:last-child .hour-slots {
-    border-bottom: 1px solid #e8ecf3;
+    border-bottom: 2px solid #c7d3e6;
   }
 
   .slot {
     min-height: 44px;
     padding: 3px 4px;
-    border-bottom: 1px dashed #eef1f7;
+    /* Яркая пунктирная линия между половинами часа */
+    border-bottom: 2px dashed #cdd8ea;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
@@ -585,7 +596,6 @@ function createEventChip(ev) {
   const chip = document.createElement('div');
   chip.className = 'slot-event';
   chip.title = ev.desc ? `${ev.title} — ${ev.desc}` : ev.title;
-  // Клик по событию не должен открывать форму нового события
   chip.addEventListener('click', e => e.stopPropagation());
 
   const info = document.createElement('div');
@@ -640,7 +650,6 @@ function renderTimeline() {
     const sk = slotKey(ev.time);
     (bySlot[sk] = bySlot[sk] || []).push(ev);
   });
-  // Внутри слота сортируем по времени
   Object.values(bySlot).forEach(arr =>
     arr.sort((a, b) => (a.time || '').localeCompare(b.time || ''))
   );
@@ -695,7 +704,6 @@ function renderTimeline() {
   }
   targetHour = Math.max(0, Math.min(23, targetHour));
 
-  // Ждём расчёт раскладки, затем скроллим
   requestAnimationFrame(() => {
     const targetRow = timeline.children[targetHour];
     if (targetRow) {
@@ -743,7 +751,6 @@ form.addEventListener('submit', e => {
 
 /* ==================== Обработчики ==================== */
 document.getElementById('addBtn').addEventListener('click', () => {
-  // В режиме дня — предлагаем эту дату; время по умолчанию 09:00
   const key = (!dayView.classList.contains('hidden') && selectedKey)
     ? selectedKey
     : todayKey();
