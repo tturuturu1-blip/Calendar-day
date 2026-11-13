@@ -30,6 +30,7 @@ let editingEventInfo = null;
 
 let isCalendarExpanded = true; 
 let inlineFormTime = null;
+let expandedEvents = new Set(); // Храним ID развернутых карточек
 
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
@@ -194,6 +195,17 @@ viewToggleBtn.addEventListener('click', () => {
     renderMonth();
 });
 
+// ==================== РАЗВОРАЧИВАНИЕ КАРТОЧЕК ====================
+window.toggleEventExpand = (id) => {
+    if (expandedEvents.has(id)) {
+        expandedEvents.delete(id);
+    } else {
+        expandedEvents.add(id);
+    }
+    // Перерисовываем только расписание, чтобы сохранить позицию скролла
+    renderAgenda();
+};
+
 // ==================== ОТРИСОВКА РАСПИСАНИЯ ====================
 function renderAgenda() {
     const key = formatDateKey(selectedDate);
@@ -211,125 +223,131 @@ function renderAgenda() {
     else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
     eventSummary.textContent = `${count} ${eventWord}`;
 
-    const SLOT_HEIGHT = 80;
-    const TOTAL_SLOTS = 48;
-
-    const parsedEvents = dayEvents.map(ev => {
-        const [sh, sm] = ev.time.split(':').map(Number);
-        const startMins = sh * 60 + sm;
-        
-        const endTimeStr = ev.endTime || addHalfHourToTime(ev.time);
-        const [eh, em] = endTimeStr.split(':').map(Number);
-        let endMins = eh * 60 + em;
-        if (endMins <= startMins) endMins += 24 * 60;
-
-        const topPx = (startMins / 30) * SLOT_HEIGHT;
-        const durationMins = endMins - startMins;
-        
-        const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - 6);
-
-        return { ...ev, endTimeStr, startMins, endMins, topPx, heightPx };
+    // Группируем события по получасовым слотам (по времени начала)
+    const eventsBySlot = {};
+    dayEvents.forEach(ev => {
+        const slotTime = roundToHalfHour(ev.time);
+        if (!eventsBySlot[slotTime]) eventsBySlot[slotTime] = [];
+        eventsBySlot[slotTime].push(ev);
     });
 
-    parsedEvents.sort((a, b) => a.startMins - b.startMins);
+    let timelineHtml = '';
 
-    let gridHtml = '';
-    for (let i = 0; i < TOTAL_SLOTS; i++) {
-        const timeStr = `${pad(Math.floor(i/2))}:${i % 2 === 0 ? '00' : '30'}`;
-        const slotStartMin = i * 30;
-        const slotEndMin = slotStartMin + 30;
+    // Генерируем 48 слотов (24 часа * 2)
+    for (let h = 0; h < 24; h++) {
+        for (let m of ['00', '30']) {
+            const timeStr = `${pad(h)}:${m}`;
+            const slotEvents = eventsBySlot[timeStr] || [];
+            const isOccupied = slotEvents.length > 0;
+            const isFormOpen = (inlineFormTime === timeStr);
 
-        const isOccupied = parsedEvents.some(ev => 
-            (ev.startMins < slotEndMin && ev.endMins > slotStartMin)
-        );
+            let smallAddBtnHtml = '';
+            let eventsHtml = '';
 
-        const isFormOpen = (inlineFormTime === timeStr);
-
-        gridHtml += `
-            <div class="time-row" style="top: ${i * SLOT_HEIGHT}px;">
-                <div class="time-label">
-                    <span class="time-text">${timeStr}</span>
-                </div>
-                
-                ${!isOccupied && !isFormOpen ? `
-                    <div class="empty-slot-content">
-                        <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Добавить событие
-                        </button>
-                    </div>
-                ` : ''}
-                
-                ${isOccupied && !isFormOpen ? `
-                    <button class="add-small-btn" onclick="openSmallAddModal('${timeStr}')" title="Добавить событие">
+            if (isOccupied) {
+                smallAddBtnHtml = `
+                    <button class="small-add-btn" onclick="openSmallAddModal('${timeStr}')" title="Добавить событие">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
-                ` : ''}
-                
-                ${isFormOpen ? `
-                    <div class="inline-form-wrapper">
-                        <div class="inline-form">
-                            <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
-                            <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
-                            <div class="inline-actions">
-                                <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
-                                <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
+                `;
+
+                eventsHtml = slotEvents.map(ev => {
+                    const isExpanded = expandedEvents.has(ev.id);
+                    const endTimeStr = ev.endTime || addHalfHourToTime(ev.time);
+                    return `
+                        <div class="event-card ${isExpanded ? 'expanded' : ''}" onclick="toggleEventExpand('${ev.id}')">
+                            <div class="event-card-header">
+                                <div class="event-info">
+                                    <div class="event-title">${ev.title}</div>
+                                    <div class="event-time-range">${ev.time} - ${endTimeStr}</div>
+                                </div>
+                                <div class="event-actions" onclick="event.stopPropagation()">
+                                    <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteEvent('${key}', '${ev.id}')">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="event-card-body">
+                                <div class="event-desc">${ev.desc || 'Нет описания'}</div>
                             </div>
                         </div>
+                    `;
+                }).join('');
+            } else if (isFormOpen) {
+                eventsHtml = `
+                    <div class="inline-form">
+                        <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
+                        <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
+                        <div class="inline-actions">
+                            <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
+                            <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
+                        </div>
                     </div>
-                ` : ''}
-            </div>
-        `;
+                `;
+            } else {
+                eventsHtml = `
+                    <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Добавить событие
+                    </button>
+                `;
+            }
+
+            timelineHtml += `
+                <div class="time-slot">
+                    <div class="time-column">
+                        <span class="time-text">${timeStr}</span>
+                        ${smallAddBtnHtml}
+                        <div class="time-dot"></div>
+                    </div>
+                    <div class="events-column">
+                        ${eventsHtml}
+                    </div>
+                </div>
+            `;
+        }
     }
 
-    let eventsHtml = '';
-    parsedEvents.forEach(ev => {
-        const isShort = ev.heightPx < 45;
-        eventsHtml += `
-            <div class="absolute-event-card ${isShort ? 'short-event' : ''}" style="top: ${ev.topPx}px; height: ${ev.heightPx}px;">
-                <div class="event-actions">
-                    <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    </button>
-                    <button class="action-btn delete" onclick="deleteEvent('${key}', '${ev.id}')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-                <div class="event-title">${ev.title}</div>
-                <div class="event-time-range">${ev.time} - ${ev.endTimeStr}</div>
-                ${ev.desc && !isShort ? `<div class="event-desc">${ev.desc}</div>` : ''}
-            </div>
-        `;
-    });
+    timelineWrapper.innerHTML = timelineHtml;
 
-    timelineWrapper.innerHTML = `
-        <div class="timeline-container" style="height: ${TOTAL_SLOTS * SLOT_HEIGHT}px;">
-            <div class="timeline-grid-layer">
-                ${gridHtml}
-            </div>
-            <div class="timeline-events-layer">
-                ${eventsHtml}
-            </div>
-        </div>
-    `;
-
+    // Скроллинг к нужному времени
     setTimeout(() => {
         const stickyHeader = document.querySelector('.agenda-header');
         const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
         
         if (inlineFormTime) {
-            const [h, m] = inlineFormTime.split(':').map(Number);
-            const targetTop = ((h * 60 + m) / 30) * SLOT_HEIGHT;
-            scheduleSection.scrollTop = targetTop - headerHeight - 20;
+            // Находим слот с открытой формой
+            const elements = Array.from(document.querySelectorAll('.time-slot'));
+            const targetSlot = elements.find(el => el.querySelector('.time-text').textContent === inlineFormTime);
+            if (targetSlot) {
+                scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 20;
+            }
         } else if (key === todayKey) {
             const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const targetTop = (currentMinutes / 30) * SLOT_HEIGHT;
-            scheduleSection.scrollTop = targetTop - headerHeight - 20;
-        } else if (parsedEvents.length > 0) {
-            scheduleSection.scrollTop = parsedEvents[0].topPx - headerHeight - 20;
+            const currentTimeStr = `${pad(now.getHours())}:${now.getMinutes() < 30 ? '00' : '30'}`;
+            const elements = Array.from(document.querySelectorAll('.time-slot'));
+            const targetSlot = elements.find(el => el.querySelector('.time-text').textContent === currentTimeStr);
+            if (targetSlot) {
+                scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 20;
+            }
+        } else if (dayEvents.length > 0) {
+            // Скролл к первому событию
+            const firstEventTime = roundToHalfHour(dayEvents[0].time);
+            const elements = Array.from(document.querySelectorAll('.time-slot'));
+            const targetSlot = elements.find(el => el.querySelector('.time-text').textContent === firstEventTime);
+            if (targetSlot) {
+                scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 20;
+            }
         } else {
-            scheduleSection.scrollTop = (8 * 60 / 30) * SLOT_HEIGHT - headerHeight - 20;
+            // Скролл к 08:00 по умолчанию
+            const elements = Array.from(document.querySelectorAll('.time-slot'));
+            const targetSlot = elements.find(el => el.querySelector('.time-text').textContent === '08:00');
+            if (targetSlot) {
+                scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 20;
+            }
         }
     }, 50);
 }
