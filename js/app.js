@@ -28,15 +28,13 @@ let selectedDate = new Date();
 let pickerDate = new Date();
 let editingEventInfo = null;
 
-// Состояния для UI
-let isCalendarExpanded = true;
+let isCalendarExpanded = true; // Развернут ли календарь на весь месяц
 let inlineFormTime = null; // Время слота, в котором открыта форма
 
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
 const formatDateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const WEEKDAYS_SHORT = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 const WEEKDAYS_FULL = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
 function roundToHalfHour(timeStr) {
@@ -58,7 +56,6 @@ function addHourToTime(timeStr) {
 const monthTitle = document.getElementById('monthTitle');
 const daysGrid = document.getElementById('daysGrid');
 const weekdaysHeader = document.getElementById('weekdaysHeader');
-const weekStrip = document.getElementById('weekStrip');
 const viewToggleBtn = document.getElementById('viewToggleBtn');
 
 const selectedDateLarge = document.getElementById('selectedDateLarge');
@@ -66,7 +63,6 @@ const agendaWeekday = document.getElementById('agendaWeekday');
 const eventSummary = document.getElementById('eventSummary');
 const timelineWrapper = document.getElementById('timelineWrapper');
 
-// Элементы модалки (для редактирования)
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');
 const eventForm = document.getElementById('eventForm');
@@ -75,129 +71,101 @@ const evDate = document.getElementById('evDate');
 const evTime = document.getElementById('evTime');
 const evDesc = document.getElementById('evDesc');
 
-// Элементы выбора месяца
 const monthPickerModal = document.getElementById('monthPickerModal');
 const pickerYearLabel = document.getElementById('pickerYearLabel');
 const pickerMonthsGrid = document.getElementById('pickerMonthsGrid');
 const jumpToDateInput = document.getElementById('jumpToDateInput');
 
+// ==================== ГЕНЕРАЦИЯ ЯЧЕЙКИ ДНЯ ====================
+function generateDayCellHTML(dateObj, todayKey, selectedKey) {
+    const key = formatDateKey(dateObj);
+    let classes = 'day-cell';
+    if (key === todayKey) classes += ' today';
+    if (key === selectedKey) classes += ' selected';
+    
+    const dayEvents = events[key] || [];
+    let dotsHtml = '<div class="dots-container">';
+    const numDots = Math.min(dayEvents.length, 3);
+    
+    for (let j = 0; j < numDots; j++) {
+        dotsHtml += `<div class="dot"></div>`;
+    }
+    dotsHtml += '</div>';
+    if (dayEvents.length === 0) dotsHtml = '<div class="dots-container"></div>';
+
+    return `
+        <div class="${classes}" data-date="${key}">
+            <span class="day-number">${dateObj.getDate()}</span>
+            ${dotsHtml}
+        </div>
+    `;
+}
+
 // ==================== ОТРИСОВКА КАЛЕНДАРЯ ====================
 function renderMonth() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
     monthTitle.textContent = MONTHS_RU[month];
-    
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    
-    let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-    let daysHtml = '';
-    
-    const prevMonthLastDay = new Date(year, month, 0).getDate();
-    for (let i = startOffset - 1; i >= 0; i--) {
-        daysHtml += `<div class="day-cell other-month"><span class="day-number">${prevMonthLastDay - i}</span></div>`;
-    }
-    
+
     const todayKey = formatDateKey(new Date());
     const selectedKey = formatDateKey(selectedDate);
-    
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-        const d = new Date(year, month, i);
-        const key = formatDateKey(d);
-        
-        let classes = 'day-cell';
-        if (key === todayKey) classes += ' today';
-        if (key === selectedKey) classes += ' selected';
-        
-        const dayEvents = events[key] || [];
-        let dotsHtml = '<div class="dots-container">';
-        const numDots = Math.min(dayEvents.length, 3);
-        
-        for (let j = 0; j < numDots; j++) {
-            dotsHtml += `<div class="dot"></div>`;
-        }
-        dotsHtml += '</div>';
-        
-        if (dayEvents.length === 0) dotsHtml = '<div class="dots-container"></div>';
+    let daysHtml = '';
 
-        daysHtml += `
-            <div class="${classes}" data-date="${key}">
-                <span class="day-number">${i}</span>
-                ${dotsHtml}
-            </div>
-        `;
+    if (isCalendarExpanded) {
+        // ПОЛНЫЙ МЕСЯЦ
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        for (let i = startOffset - 1; i >= 0; i--) {
+            daysHtml += `<div class="day-cell other-month"><span class="day-number">${prevMonthLastDay - i}</span></div>`;
+        }
+        
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+            daysHtml += generateDayCellHTML(new Date(year, month, i), todayKey, selectedKey);
+        }
+        
+        const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
+        const nextDaysNeeded = totalCells - (startOffset + lastDay.getDate());
+        for (let i = 1; i <= nextDaysNeeded; i++) {
+            daysHtml += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
+        }
+    } else {
+        // ТОЛЬКО ТЕКУЩАЯ НЕДЕЛЯ
+        const startOfWeek = new Date(selectedDate);
+        const dayOfWeek = startOfWeek.getDay();
+        // Получаем понедельник этой недели
+        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
+        startOfWeek.setDate(diff);
+
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(startOfWeek);
+            d.setDate(startOfWeek.getDate() + i);
+            daysHtml += generateDayCellHTML(d, todayKey, selectedKey);
+        }
     }
-    
-    const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
-    const nextDaysNeeded = totalCells - (startOffset + lastDay.getDate());
-    for (let i = 1; i <= nextDaysNeeded; i++) {
-        daysHtml += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
-    }
-    
+
     daysGrid.innerHTML = daysHtml;
     
+    // Обработчики кликов по датам
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
-            inlineFormTime = null; // Закрываем форму при смене даты
+            currentDate = new Date(selectedDate); // Синхронизируем текущий месяц
+            inlineFormTime = null;
             renderMonth(); 
             renderAgenda();
         });
     });
 }
 
-// Отрисовка ленты недели (свернутый календарь)
-function renderWeekStrip() {
-    let html = '';
-    const startOfWeek = new Date(selectedDate);
-    const dayOfWeek = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
-    startOfWeek.setDate(diff);
-
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(startOfWeek);
-        d.setDate(startOfWeek.getDate() + i);
-        const dKey = formatDateKey(d);
-        const isSelected = dKey === formatDateKey(selectedDate);
-        
-        html += `
-            <div class="date-pill ${isSelected ? 'active' : ''}" onclick="selectDateFromStrip('${dKey}')">
-                <span class="pill-day">${d.getDate()}</span>
-                <span class="pill-weekday">${WEEKDAYS_SHORT[d.getDay()]}</span>
-            </div>
-        `;
-    }
-    weekStrip.innerHTML = html;
-}
-
-window.selectDateFromStrip = (key) => {
-    const [y, m, d] = key.split('-');
-    selectedDate = new Date(y, m - 1, d);
-    currentDate = new Date(selectedDate);
-    inlineFormTime = null;
-    renderMonth();
-    renderAgenda();
-    renderWeekStrip();
-};
-
 // Переключение вида календаря
 viewToggleBtn.addEventListener('click', () => {
     isCalendarExpanded = !isCalendarExpanded;
-    
-    if (isCalendarExpanded) {
-        weekdaysHeader.classList.remove('hidden');
-        daysGrid.classList.remove('hidden');
-        weekStrip.classList.add('hidden');
-        viewToggleBtn.textContent = 'Расписание';
-    } else {
-        weekdaysHeader.classList.add('hidden');
-        daysGrid.classList.add('hidden');
-        weekStrip.classList.remove('hidden');
-        viewToggleBtn.textContent = 'Календарь';
-        renderWeekStrip();
-    }
+    viewToggleBtn.textContent = isCalendarExpanded ? 'Расписание' : 'Календарь';
+    renderMonth();
 });
 
 // ==================== ОТРИСОВКА РАСПИСАНИЯ ====================
@@ -233,7 +201,6 @@ function renderAgenda() {
             
             let slotContentHtml = slotEvents.map(ev => renderTimelineCard(ev, key)).join('');
 
-            // Если в этом слоте открыта форма добавления
             if (inlineFormTime === timeStr) {
                 slotContentHtml += `
                     <div class="inline-form">
@@ -267,7 +234,6 @@ function renderAgenda() {
 
     timelineWrapper.innerHTML = timelineHtml;
 
-    // Прокрутка к текущему времени или форме
     setTimeout(() => {
         const now = new Date();
         let scrollHour = 8;
@@ -307,7 +273,6 @@ function renderTimelineCard(ev, dateKey) {
 window.openInlineForm = (timeStr) => {
     inlineFormTime = timeStr;
     renderAgenda();
-    // Автофокус на поле ввода
     setTimeout(() => {
         const input = document.getElementById('inlineTitle');
         if (input) input.focus();
@@ -343,12 +308,10 @@ window.saveInlineEvent = (dateKey, timeStr) => {
     saveData(events);
     inlineFormTime = null;
     
-    renderMonth(); // Обновляем точки на календаре
-    if (!isCalendarExpanded) renderWeekStrip();
-    renderAgenda(); // Перерисовываем таймлайн
+    renderMonth(); 
+    renderAgenda();
 };
 
-// Кнопка "+" в шапке теперь открывает инлайн-форму на 09:00
 document.getElementById('addBtn').addEventListener('click', () => {
     inlineFormTime = '09:00';
     renderAgenda();
@@ -383,7 +346,6 @@ window.deleteEvent = (dateKey, id) => {
     saveData(events);
     
     renderMonth();
-    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
 };
 
@@ -418,7 +380,6 @@ eventForm.addEventListener('submit', (e) => {
     currentDate = new Date(selectedDate);
     
     renderMonth();
-    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
 });
 
@@ -473,7 +434,6 @@ jumpToDateInput.addEventListener('change', (e) => {
     selectedDate = new Date(newDate);
     inlineFormTime = null;
     renderMonth();
-    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
     closeMonthPicker();
 });
@@ -495,7 +455,6 @@ document.getElementById('todayBtn').addEventListener('click', () => {
     selectedDate = new Date(now);
     inlineFormTime = null;
     renderMonth();
-    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
 });
 
