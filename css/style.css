@@ -222,7 +222,7 @@ body {
 .schedule-section {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 0 20px 40px 20px;
+    padding: 0 15px 40px 15px; /* Слегка уменьшили отступы по бокам */
     position: relative;
 }
 
@@ -231,11 +231,13 @@ body {
     top: 0;
     z-index: 50;
     background-color: var(--bg-color);
-    padding: 15px 20px;
-    margin: 0 -20px; 
+    padding: 15px 15px 15px 15px;
+    margin: 0 -15px; 
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    border-bottom: 2px solid #cbd5e1; /* Разделительная линия под датой */
+    margin-bottom: 15px;
 }
 
 .date-info {
@@ -294,7 +296,6 @@ body {
 /* ==================== ТАЙМЛАЙН (АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ) ==================== */
 .timeline-wrapper {
     position: relative;
-    margin-top: 10px;
 }
 
 .timeline-container {
@@ -311,7 +312,7 @@ body {
 /* Единая вертикальная линия */
 .vertical-line {
     position: absolute;
-    left: 65px;
+    left: 48px; /* Сдвинуто влево */
     top: 0;
     bottom: 0;
     border-left: 2px solid #000000;
@@ -321,14 +322,14 @@ body {
 .time-row {
     position: absolute;
     left: 0; right: 0;
-    height: 80px; /* Высота одного 30-минутного слота */
+    height: 80px;
 }
 
 /* Горизонтальная пунктирная линия */
 .time-row::after {
     content: '';
     position: absolute;
-    left: 65px;
+    left: 48px;
     right: 0;
     top: 18px;
     border-top: 1px dashed #000000;
@@ -339,7 +340,7 @@ body {
 .time-label {
     position: absolute;
     left: 0; top: 10px;
-    width: 55px;
+    width: 40px;
     text-align: right;
     font-size: 12px;
     font-weight: 700;
@@ -349,7 +350,7 @@ body {
 /* Точка на пересечении */
 .time-dot {
     position: absolute;
-    left: 61px; /* Центрирование на линии (65px - 4px) */
+    left: 44px; /* Центрирование на линии (48px - 4px) */
     top: 14px;
     width: 8px;
     height: 8px;
@@ -361,8 +362,8 @@ body {
 /* Маленькая кнопка "+" (для занятых слотов) */
 .small-add-btn {
     position: absolute;
-    left: 48px; /* Центр под временем */
-    top: 28px;
+    left: 28px; /* Точно по центру под цифрами времени */
+    top: 26px;
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -383,9 +384,9 @@ body {
 /* Контейнер для пустого слота */
 .empty-slot-content {
     position: absolute;
-    left: 80px; /* Отступ от линии */
-    right: 10px;
-    top: 22px; /* Чуть ниже линии */
+    left: 63px; /* Сдвинуто влево */
+    right: 0;
+    top: 22px;
     pointer-events: auto;
 }
 
@@ -415,8 +416,8 @@ body {
 /* Обертка для встроенной формы */
 .inline-form-wrapper {
     position: absolute;
-    left: 80px;
-    right: 10px;
+    left: 63px;
+    right: 0;
     z-index: 40;
     pointer-events: auto;
 }
@@ -491,8 +492,8 @@ body {
 
 .absolute-event-card {
     position: absolute;
-    left: 80px;
-    right: 10px;
+    left: 63px; /* Сдвинуто влево */
+    right: 0;
     background: var(--card-bg);
     border-radius: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -514,27 +515,38 @@ body {
 .event-card-header {
     padding: 10px 12px;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column; /* Теперь элементы идут друг под другом */
+    gap: 4px;
     flex-shrink: 0;
 }
 
-.event-info {
+.event-title-row {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex-grow: 1;
-    padding-right: 10px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .event-title {
     font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.3;
+    word-break: break-word; /* Перенос длинных названий */
+    flex-grow: 1;
+}
+
+.event-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.event-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .event-time-range {
@@ -543,9 +555,27 @@ body {
     font-weight: 600;
 }
 
-.event-actions {
+/* Кнопка-галочка для разворачивания */
+.toggle-desc-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--secondary-text);
     display: flex;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: transform 0.2s;
+}
+
+.toggle-desc-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s;
+}
+
+.absolute-event-card.expanded .toggle-desc-btn svg {
+    transform: rotate(180deg);
 }
 
 .action-btn {
@@ -587,9 +617,6 @@ body {
     height: auto !important;
     z-index: 20;
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-.absolute-event-card.expanded .event-title {
-    white-space: normal;
 }
 .absolute-event-card.expanded .event-card-body {
     display: block;
