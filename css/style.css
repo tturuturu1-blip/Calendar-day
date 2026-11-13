@@ -242,11 +242,22 @@ body {
     display: flex;
     flex-direction: column;
 }
+
 .date-large {
     font-size: 32px;
     font-weight: 800;
     line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
 }
+
+.month-small {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--secondary-text);
+}
+
 .full-weekday {
     font-size: 14px;
     font-weight: 600;
@@ -294,16 +305,15 @@ body {
 .timeline-grid-layer {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none; /* Пропускаем клики сквозь сетку */
+    pointer-events: none;
 }
 
 .time-row {
     position: absolute;
     left: 0; right: 0;
-    height: 80px; /* Высота одного 30-минутного слота */
+    height: 80px;
 }
 
-/* Горизонтальная разделительная линия */
 .time-row::after {
     content: '';
     position: absolute;
@@ -327,7 +337,6 @@ body {
     color: #000000;
 }
 
-/* Точка на линии */
 .time-label::after {
     content: '';
     position: absolute;
@@ -340,16 +349,14 @@ body {
     z-index: 2;
 }
 
-/* Контейнер для пустого слота (кнопка "Добавить событие") */
 .empty-slot-content {
     position: absolute;
-    left: 71px; /* 55px (время) + 16px (отступ) */
+    left: 71px;
     right: 10px;
     top: 22px;
     pointer-events: auto;
 }
 
-/* Кнопка "Добавить событие" для пустых слотов */
 .add-slot-btn {
     background: var(--bg-color);
     border: 2px dashed #cbd5e1;
@@ -373,10 +380,9 @@ body {
     color: var(--primary-text);
 }
 
-/* Маленькая кнопка с плюсиком для занятых слотов */
 .add-small-btn {
     position: absolute;
-    left: 42px; /* Ровно под временем */
+    left: 42px;
     top: 25px;
     width: 24px;
     height: 24px;
@@ -395,7 +401,6 @@ body {
 }
 .add-small-btn:hover { background: var(--accent-hover); }
 
-/* Обертка для встроенной формы */
 .inline-form-wrapper {
     position: absolute;
     left: 71px;
@@ -470,13 +475,12 @@ body {
 .timeline-events-layer {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none; /* Пропускаем клики сквозь слой */
+    pointer-events: none;
 }
 
-/* Карточка события, позиционируемая абсолютно */
 .absolute-event-card {
     position: absolute;
-    left: 71px; /* Выравнивание по сетке */
+    left: 71px;
     right: 10px;
     background: var(--card-bg);
     border-radius: 14px;
@@ -487,8 +491,8 @@ body {
     z-index: 10;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Обрезаем текст, если не влезает */
-    pointer-events: auto; /* Включаем клики для самой карточки */
+    overflow: hidden;
+    pointer-events: auto;
 }
 
 .absolute-event-card .event-title {
@@ -520,7 +524,6 @@ body {
     overflow: hidden;
 }
 
-/* Если событие короткое (15 минут), прячем описание */
 .absolute-event-card.short-event .event-desc {
     display: none;
 }
