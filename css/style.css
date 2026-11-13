@@ -255,7 +255,7 @@ body {
 /* ==================== БЛОК AGENDA (РАСПИСАНИЕ) ==================== */
 .agenda-section {
     background: var(--card-bg);
-    border-radius: 24px; /* Закругления со всех сторон */
+    border-radius: 24px;
     padding: 20px 20px 0 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
@@ -329,7 +329,7 @@ body {
     display: flex;
     min-height: 80px;
     position: relative;
-    align-items: flex-start; /* Выравнивание по верхнему краю */
+    align-items: stretch; /* Ключевое изменение: заставляет контент растягиваться на всю высоту слота */
 }
 
 /* Метка времени слева */
@@ -341,7 +341,7 @@ body {
     color: var(--secondary-text);
     text-align: right;
     padding-right: 12px;
-    padding-top: 17px; /* Выровнено под текст карточки */
+    padding-top: 4px; /* Выравнивание текста по верху */
     position: relative;
 }
 
@@ -349,7 +349,7 @@ body {
     content: '';
     position: absolute;
     right: -5px;
-    top: 19px;
+    top: 6px; /* Точка выровнена по тексту */
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -357,7 +357,7 @@ body {
     z-index: 2;
 }
 
-/* Правая часть */
+/* Правая часть (с линией и контентом) */
 .slot-content {
     flex-grow: 1;
     border-left: 2px solid #cbd5e1;
@@ -456,7 +456,7 @@ body {
 .timeline-card {
     background: var(--card-bg);
     border-radius: 14px;
-    padding: 16px 14px 14px 14px;
+    padding: 12px 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     border: 1px solid #cbd5e1;
     border-left: 6px solid var(--dot-cyan);
@@ -485,8 +485,8 @@ body {
 
 .event-actions {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
     display: flex;
     gap: 6px;
 }
