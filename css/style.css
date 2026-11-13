@@ -18,27 +18,24 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #d1d9e2;
+    background-color: var(--bg-color);
+    color: var(--primary-text);
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: var(--primary-text);
+    /* Убрали темный фон вокруг телефона */
 }
 
-/* Имитация экрана смартфона */
+/* Контейнер приложения теперь полноэкранный (с ограничением для ПК) */
 .app-container {
     width: 100%;
-    max-width: 420px;
-    height: 90vh;
-    max-height: 850px;
+    max-width: 500px; /* Чтобы на мониторе не растягивалось на весь экран */
+    height: 100vh;
+    height: 100dvh; /* Для корректной высоты на мобильных браузерах */
     background-color: var(--bg-color);
-    border-radius: 40px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15), inset 0 0 0 8px #1a1a1a;
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* ==================== ОБЩИЕ ЭЛЕМЕНТЫ ==================== */
@@ -46,7 +43,7 @@ body {
     display: none;
     flex-direction: column;
     height: 100%;
-    padding: 24px 20px 80px 20px;
+    padding: 24px 20px 40px 20px; /* Уменьшили нижний отступ, так как нет меню */
     overflow-y: auto;
 }
 .view.active { display: flex; }
@@ -92,21 +89,21 @@ body {
 .days-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 6px; /* Сделал отступ чуть меньше для компактности */
     margin-bottom: 30px;
 }
 
-/* ==================== СТИЛЬ ЯЧЕЙКИ ДНЯ (КАК НА КАРТИНКЕ) ==================== */
+/* СТИЛЬ ЯЧЕЙКИ ДНЯ */
 .day-cell {
-    aspect-ratio: 1 / 1.2; /* Делаем ячейку чуть вытянутой по вертикали */
+    aspect-ratio: 1 / 1.15; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: #ffffff;
-    border: 1.5px solid #e0e5ec; /* Мягкая обводка */
-    border-radius: 16px; /* Сильное скругление */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.02); /* Легкая тень */
+    border: 1.5px solid #e0e5ec;
+    border-radius: 14px; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
@@ -123,48 +120,45 @@ body {
     color: #bcc9d6;
 }
 
-/* Эффект при наведении и выборе */
 .day-cell:hover {
     border-color: #b0c4de;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 .day-cell.selected {
     border-color: var(--dark-btn);
     background-color: var(--bg-color);
-    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
 }
 
-/* Крупная цифра дня */
 .day-number {
-    font-size: 18px;
+    font-size: 17px; /* Чуть уменьшил, чтобы помещалось в рамку */
     font-weight: 600;
     color: var(--primary-text);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     line-height: 1;
 }
 
 /* Контейнер для точек */
 .dots-container {
     display: flex;
-    gap: 4px;
-    height: 6px; /* Фиксируем высоту, чтобы ячейки не прыгали, если нет точек */
+    gap: 3px;
+    height: 5px; 
     align-items: center;
     justify-content: center;
 }
 
 /* Сами точки */
 .dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     display: inline-block;
 }
 
-/* Раскрашиваем точки по кругу (1-я голубая, 2-я фиолетовая, 3-я темно-синяя) */
+/* Раскрашиваем точки */
 .dot:nth-child(3n+1) { background-color: var(--dot-cyan); }
-.dot:nth-child(3n+2) { background-color: var(--dot-purple); }
-.dot:nth-child(3n+3) { background-color: var(--dot-darkblue); }
-
+.dot:nth-child(2) { background-color: var(--dot-purple); }
+.dot:nth-child(3) { background-color: var(--dot-darkblue); }
 
 /* ==================== БЛОК AGENDA (НИЖНЯЯ ЧАСТЬ) ==================== */
 .agenda-section {
@@ -333,10 +327,10 @@ body {
     padding: 6px 10px;
 }
 
-/* ==================== FAB И НАВИГАЦИЯ ==================== */
+/* ==================== FAB (КНОПКА ДОБАВЛЕНИЯ) ==================== */
 .fab {
     position: absolute;
-    bottom: 90px;
+    bottom: 30px; /* Опустили ниже, так как нет нижней панели */
     right: 20px;
     width: 56px;
     height: 56px;
@@ -351,32 +345,6 @@ body {
     z-index: 20;
 }
 
-.bottom-nav {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 70px;
-    background: var(--card-bg);
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 0 20px;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
-}
-.bottom-nav svg {
-    width: 24px;
-    height: 24px;
-    color: var(--secondary-text);
-}
-.bottom-nav .active-icon {
-    color: var(--dark-btn);
-    background: var(--accent-color);
-    padding: 10px;
-    border-radius: 50%;
-}
-
 /* ==================== МОДАЛЬНОЕ ОКНО ==================== */
 .modal-overlay {
     position: absolute;
@@ -389,7 +357,7 @@ body {
     pointer-events: none;
     transition: opacity 0.3s;
     z-index: 100;
-    border-radius: 40px;
+    /* Убрали border-radius: 40px; так как нет рамки телефона */
 }
 .modal-overlay.active {
     opacity: 1;
@@ -398,6 +366,7 @@ body {
 .modal-content {
     background: var(--card-bg);
     width: 100%;
+    max-width: 500px; /* Ограничение по ширине для ПК */
     border-top-left-radius: 24px;
     border-top-right-radius: 24px;
     padding: 24px;
