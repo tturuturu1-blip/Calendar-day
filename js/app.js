@@ -35,6 +35,7 @@ let inlineFormTime = null;
 const pad = n => String(n).padStart(2, '0');
 const formatDateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const WEEKDAYS_FULL = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
 function roundToHalfHour(timeStr) {
@@ -45,10 +46,15 @@ function roundToHalfHour(timeStr) {
     return `${pad(h)}:${m}`;
 }
 
-function addHourToTime(timeStr) {
-    if (!timeStr) return '01:00';
+// Добавляет 30 минут к времени
+function addHalfHourToTime(timeStr) {
+    if (!timeStr) return '00:30';
     let [h, m] = timeStr.split(':').map(Number);
-    h = (h + 1) % 24;
+    m += 30;
+    if (m >= 60) {
+        m -= 60;
+        h = (h + 1) % 24;
+    }
     return `${pad(h)}:${pad(m)}`;
 }
 
@@ -107,7 +113,32 @@ function generateDayCellHTML(dateObj, todayKey, selectedKey) {
 function renderMonth() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    monthTitle.textContent = MONTHS_RU[month];
+
+    // Логика отображения заголовка: Месяц или Диапазон недели
+    if (isCalendarExpanded) {
+        monthTitle.textContent = MONTHS_RU[month];
+    } else {
+        const startOfWeek = new Date(selectedDate);
+        const dayOfWeek = startOfWeek.getDay();
+        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
+        startOfWeek.setDate(diff);
+        
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        const startDay = startOfWeek.getDate();
+        const endDay = endOfWeek.getDate();
+        const startMonth = MONTHS_SHORT[startOfWeek.getMonth()];
+        const endMonth = MONTHS_SHORT[endOfWeek.getMonth()];
+
+        // Если неделя не переходит на другой месяц, выводим просто "13 - 19"
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+            monthTitle.textContent = `${startDay} - ${endDay}`;
+        } else {
+            // Если переходит: "28 окт - 3 ноя"
+            monthTitle.textContent = `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
+        }
+    }
 
     const todayKey = formatDateKey(new Date());
     const selectedKey = formatDateKey(selectedDate);
@@ -231,7 +262,7 @@ function renderAgenda() {
 
     timelineWrapper.innerHTML = timelineHtml;
 
-    // Скроллим весь блок scheduleSection к нужному часу с учетом закрепленной шапки
+    // Прокрутка к нужному часу
     setTimeout(() => {
         const now = new Date();
         let scrollHour = 8;
@@ -243,17 +274,16 @@ function renderAgenda() {
         
         const targetSlot = timelineWrapper.children[scrollHour * 2];
         if (targetSlot) {
-            // Вычисляем высоту закрепленной шапки, чтобы прокрутить ровно под ней
             const stickyHeader = document.querySelector('.agenda-header');
             const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-            
             scheduleSection.scrollTop = targetSlot.offsetTop - headerHeight - 5;
         }
     }, 50);
 }
 
 function renderTimelineCard(ev, dateKey) {
-    const endTime = ev.endTime || addHourToTime(ev.time); 
+    // Если endTime нет (старые записи), ставим +30 минут
+    const endTime = ev.endTime || addHalfHourToTime(ev.time); 
     return `
         <div class="timeline-card">
             <div class="event-actions">
@@ -299,7 +329,8 @@ window.saveInlineEvent = (dateKey, timeStr) => {
         return;
     }
     
-    const endTime = addHourToTime(timeStr);
+    // Ставим длительность 30 минут вместо часа
+    const endTime = addHalfHourToTime(timeStr);
     
     if (!events[dateKey]) events[dateKey] = [];
     events[dateKey].push({
@@ -318,6 +349,7 @@ window.saveInlineEvent = (dateKey, timeStr) => {
 };
 
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
+// Кнопка "+" в шапке теперь открывает форму с длительностью 30 минут по умолчанию
 document.getElementById('addBtn').addEventListener('click', () => {
     editingEventInfo = null;
     modalTitle.textContent = 'Новое событие';
@@ -326,7 +358,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
     evDesc.value = '';
     evDate.value = formatDateKey(selectedDate);
     evTime.value = '09:00';
-    evEndTime.value = '10:00';
+    evEndTime.value = '09:30'; // Изменено на полчаса
     
     modal.classList.add('active');
     setTimeout(() => evTitle.focus(), 300);
@@ -342,7 +374,9 @@ window.editEvent = (dateKey, id) => {
     evTitle.value = ev.title;
     evDate.value = dateKey;
     evTime.value = ev.time;
-    evEndTime.value = ev.endTime || addHourToTime(ev.time); 
+    
+    // Если у старого события нет endTime, высчитываем как +30 минут
+    evEndTime.value = ev.endTime || addHalfHourToTime(ev.time); 
     evDesc.value = ev.desc || '';
     
     modal.classList.add('active');
@@ -463,11 +497,28 @@ monthPickerModal.addEventListener('click', (e) => { if (e.target === monthPicker
 
 // ==================== НАВИГАЦИЯ ====================
 document.getElementById('prevMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
+    if (isCalendarExpanded) {
+        // Листаем месяц назад
+        currentDate.setMonth(currentDate.getMonth() - 1);
+    } else {
+        // Листаем неделю назад
+        selectedDate.setDate(selectedDate.getDate() - 7);
+        currentDate.setDate(currentDate.getDate() - 7);
+        renderAgenda();
+    }
     renderMonth();
 });
+
 document.getElementById('nextMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
+    if (isCalendarExpanded) {
+        // Листаем месяц вперед
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    } else {
+        // Листаем неделю вперед
+        selectedDate.setDate(selectedDate.getDate() + 7);
+        currentDate.setDate(currentDate.getDate() + 7);
+        renderAgenda();
+    }
     renderMonth();
 });
 
