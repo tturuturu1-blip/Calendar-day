@@ -27,8 +27,9 @@ let currentDate = new Date();
 let selectedDate = new Date();
 let pickerDate = new Date();
 let editingEventInfo = null;
+let pendingDeleteInfo = null; // Для модального окна удаления
 
-let isCalendarExpanded = true; 
+let isCalendarExpanded = false; // ПРИ ОТКРЫТИИ СРАЗУ НЕДЕЛЯ
 let inlineFormTime = null;
 let expandedEvents = new Set(); 
 
@@ -85,6 +86,8 @@ const monthPickerModal = document.getElementById('monthPickerModal');
 const pickerYearLabel = document.getElementById('pickerYearLabel');
 const pickerMonthsGrid = document.getElementById('pickerMonthsGrid');
 const jumpToDateInput = document.getElementById('jumpToDateInput');
+
+const deleteModal = document.getElementById('deleteModal');
 
 // ==================== ГЕНЕРАЦИЯ ЯЧЕЙКИ ====================
 function generateDayCellHTML(dateObj, todayKey, selectedKey) {
@@ -196,7 +199,8 @@ viewToggleBtn.addEventListener('click', () => {
 });
 
 // ==================== РАЗВОРАЧИВАНИЕ КАРТОЧЕК ====================
-window.toggleEventExpand = (id) => {
+window.toggleEventExpand = (id, event) => {
+    event.stopPropagation(); // Предотвращаем двойное срабатывание, если клик по кнопке
     if (expandedEvents.has(id)) {
         expandedEvents.delete(id);
     } else {
@@ -224,9 +228,8 @@ function renderAgenda() {
 
     const SLOT_HEIGHT = 80;
     const TOTAL_SLOTS = 48;
-    const TOP_OFFSET = 22; // Отступ карточки от верхней границы слота (чтобы была ниже линии)
+    const TOP_OFFSET = 22; 
 
-    // Рассчитываем позиции событий
     const parsedEvents = dayEvents.map(ev => {
         const [sh, sm] = ev.time.split(':').map(Number);
         const startMins = sh * 60 + sm;
@@ -236,10 +239,7 @@ function renderAgenda() {
         let endMins = eh * 60 + em;
         if (endMins <= startMins) endMins += 24 * 60;
 
-        // Вычисляем отступ сверху (добавляем TOP_OFFSET, чтобы карточка была ниже пунктирной линии)
         const topPx = (startMins / 30) * SLOT_HEIGHT + TOP_OFFSET;
-        
-        // Высота карточки = длительность - TOP_OFFSET - 4px (отступ снизу между карточками)
         const durationMins = endMins - startMins;
         const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - TOP_OFFSET - 4);
 
@@ -248,7 +248,6 @@ function renderAgenda() {
 
     parsedEvents.sort((a, b) => a.startMins - b.startMins);
 
-    // 1. Генерация сетки
     let gridHtml = `<div class="vertical-line"></div>`;
     for (let i = 0; i < TOTAL_SLOTS; i++) {
         const timeStr = `${pad(Math.floor(i/2))}:${i % 2 === 0 ? '00' : '30'}`;
@@ -296,27 +295,37 @@ function renderAgenda() {
         `;
     }
 
-    // 2. Генерация карточек событий
     let eventsHtml = '';
     parsedEvents.forEach(ev => {
         const isExpanded = expandedEvents.has(ev.id);
         const heightStyle = isExpanded ? '' : `height: ${ev.heightPx}px;`;
+        
+        // Показываем галочку только если есть описание
+        const hasDesc = ev.desc && ev.desc.trim().length > 0;
+        const toggleBtnHtml = hasDesc ? `
+            <button class="toggle-desc-btn" onclick="toggleEventExpand('${ev.id}', event)" title="Показать/скрыть описание">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+        ` : '';
+
         eventsHtml += `
             <div class="absolute-event-card ${isExpanded ? 'expanded' : ''}" 
-                 style="top: ${ev.topPx}px; ${heightStyle}"
-                 onclick="toggleEventExpand('${ev.id}')">
+                 style="top: ${ev.topPx}px; ${heightStyle}">
                 <div class="event-card-header">
-                    <div class="event-info">
+                    <div class="event-title-row">
                         <div class="event-title">${ev.title}</div>
-                        <div class="event-time-range">${ev.time} - ${ev.endTimeStr}</div>
+                        <div class="event-actions" onclick="event.stopPropagation()">
+                            <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" onclick="openDeleteModal('${key}', '${ev.id}')">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="event-actions" onclick="event.stopPropagation()">
-                        <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-                        <button class="action-btn delete" onclick="deleteEvent('${key}', '${ev.id}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
+                    <div class="event-meta">
+                        <div class="event-time-range">${ev.time} - ${ev.endTimeStr}</div>
+                        ${toggleBtnHtml}
                     </div>
                 </div>
                 <div class="event-card-body">
@@ -451,12 +460,26 @@ window.editEvent = (dateKey, id) => {
 
 function closeModal() { modal.classList.remove('active'); }
 
-window.deleteEvent = (dateKey, id) => {
-    if (!confirm('Удалить событие?')) return;
+// МОДАЛЬНОЕ ОКНО УДАЛЕНИЯ
+window.openDeleteModal = (dateKey, id) => {
+    pendingDeleteInfo = { dateKey, id };
+    deleteModal.classList.add('active');
+};
+
+window.closeDeleteModal = () => {
+    pendingDeleteInfo = null;
+    deleteModal.classList.remove('active');
+};
+
+window.confirmDelete = () => {
+    if (!pendingDeleteInfo) return;
+    
+    const { dateKey, id } = pendingDeleteInfo;
     events[dateKey] = events[dateKey].filter(ev => ev.id !== id);
     if (events[dateKey].length === 0) delete events[dateKey];
     saveData(events);
     
+    closeDeleteModal();
     renderMonth();
     renderAgenda();
 };
@@ -595,6 +618,9 @@ document.getElementById('todayBtn').addEventListener('click', () => {
 });
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+// При старте вызываем переключение вида, чтобы текст кнопки сменился на "Календарь"
+viewToggleBtn.textContent = isCalendarExpanded ? 'Расписание' : 'Календарь';
+
 selectedDate = new Date();
 currentDate = new Date();
 renderMonth();
