@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Подключаем библиотеку для шифрования данных -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <!-- Путь к стилям -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Контейнер для мобильного вида -->
     <div class="app-container">
         
         <!-- ==================== ЭКРАН 1: МЕСЯЦ ==================== -->
@@ -28,7 +28,7 @@
             </header>
 
             <div class="weekdays">
-                <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div class="weekend">Sa</div><div class="weekend">Su</div>
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
             </div>
             
             <div class="days-grid" id="daysGrid">
@@ -39,12 +39,12 @@
             <div class="agenda-section">
                 <div class="agenda-header">
                     <div>
-                        <span class="today-label">TODAY</span>
+                        <span class="today-label">СЕГОДНЯ</span>
                         <div class="date-large" id="selectedDateLarge">25</div>
                     </div>
                     <div class="agenda-summary">
-                        <span id="eventSummary">0 events</span>
-                        <button class="view-all-btn" id="goToDayBtn">View all</button>
+                        <span id="eventSummary">0 событий</span>
+                        <button class="view-all-btn" id="goToDayBtn">Все</button>
                     </div>
                 </div>
                 <div class="agenda-list" id="agendaList">
@@ -79,7 +79,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
 
-        <!-- Нижняя навигация (декоративная, для стиля) -->
+        <!-- Нижняя навигация (декоративная) -->
         <nav class="bottom-nav">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
@@ -89,7 +89,7 @@
         </nav>
     </div>
 
-    <!-- Модальное окно добавления/редактирования события -->
+    <!-- Модальное окно -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -120,6 +120,7 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Путь к скриптам -->
+    <script src="js/app.js"></script>
 </body>
 </html>
