@@ -1,807 +1,138 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Календарь</title>
-<style>
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #eef1f7;
-    color: #1f2937;
-    min-height: 100vh;
-  }
-
-  #app { max-width: 860px; margin: 0 auto; padding: 16px; }
-
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
-  header h1 { font-size: 22px; margin: 0; }
-
-  .btn {
-    border: none;
-    border-radius: 10px;
-    padding: 10px 16px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform .1s, background .2s, opacity .2s;
-  }
-  .btn:active { transform: scale(.97); }
-
-  .btn-primary {
-    background: #3b6fe0;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(59,111,224,.35);
-  }
-  .btn-primary:hover { background: #2f5ec4; }
-
-  .btn-ghost {
-    background: #fff;
-    color: #1f2937;
-    border: 1px solid #d8dee9;
-  }
-  .btn-ghost:hover { background: #f3f5f9; }
-
-  /* ---------- Календарь на месяц ---------- */
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 6px 24px rgba(31,41,55,.07);
-  }
-
-  .month-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .month-nav h2 {
-    margin: 0;
-    font-size: 18px;
-    text-transform: capitalize;
-  }
-
-  .nav-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    border: 1px solid #d8dee9;
-    background: #fff;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    color: #3b6fe0;
-  }
-  .nav-btn:hover { background: #f3f5f9; }
-
-  .weekdays, .days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-  }
-
-  .weekdays {
-    margin-bottom: 6px;
-  }
-
-  .weekdays div {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: #8a94a6;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    padding: 4px 0;
-  }
-  .weekdays div.weekend { color: #d06060; }
-
-  .day {
-    position: relative;
-    min-height: 72px;
-    background: #f8fafc;
-    /* Обводка дат: толще, ярче и более круглая */
-    border: 2px solid #b9c9e6;
-    border-radius: 18px;
-    padding: 6px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
-  }
-  .day:hover {
-    background: #e8eefb;
-    border-color: #6a8fe6;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59,111,224,.18);
-  }
-  .day.other { opacity: .45; }
-  .day.today {
-    border-color: #3b6fe0;
-    background: #eaf0fe;
-    box-shadow: 0 0 0 3px rgba(59,111,224,.18);
-  }
-  .day .num {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .day.today .num { color: #3b6fe0; }
-  .day.weekend .num { color: #c25050; }
-
-  .dots {
-    margin-top: auto;
-    display: flex;
-    gap: 3px;
-    flex-wrap: wrap;
-  }
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #3b6fe0;
-  }
-
-  /* ---------- Экран дня ---------- */
-  .hidden { display: none !important; }
-
-  .day-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .day-nav-info { flex: 1; min-width: 0; }
-  .day-nav-info h2 { margin: 0; font-size: 19px; }
-  .day-nav-info .sub { font-size: 13px; color: #8a94a6; margin-top: 2px; }
-
-  .day-nav {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .hint {
-    font-size: 12.5px;
-    color: #8a94a6;
-    margin: 0 0 10px;
-  }
-
-  /* ---------- Сетка времени ---------- */
-  .timeline-wrap {
-    max-height: 62vh;
-    overflow-y: auto;
-    /* Более яркая рамка контейнера */
-    border: 2px solid #c2cfe4;
-    border-radius: 12px;
-    background: #fff;
-  }
-
-  .timeline {
-    position: relative;
-    padding: 16px 8px 16px 0;
-  }
-
-  .hour-row {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  .hour-label {
-    width: 54px;
-    flex: 0 0 54px;
-    text-align: right;
-    padding-right: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    /* Чуть контрастнее подписи часов */
-    color: #6b7a90;
-    transform: translateY(-7px);
-    user-select: none;
-  }
-
-  .hour-slots {
-    flex: 1;
-    min-width: 0;
-    /* Яркая линия между часами */
-    border-top: 2px solid #c7d3e6;
-  }
-
-  .hour-row:last-child .hour-slots {
-    border-bottom: 2px solid #c7d3e6;
-  }
-
-  .slot {
-    min-height: 44px;
-    padding: 3px 4px;
-    /* Яркая пунктирная линия между половинами часа */
-    border-bottom: 2px dashed #cdd8ea;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    transition: background .12s;
-  }
-
-  .slot:last-child { border-bottom: none; }
-
-  .slot:hover { background: #eaf0fe; }
-
-  .slot.now { background: #fff6e5; }
-  .slot.now:hover { background: #ffedcf; }
-
-  .slot-event {
-    background: #eaf0fe;
-    border-left: 3px solid #3b6fe0;
-    border-radius: 6px;
-    padding: 3px 6px;
-    font-size: 12px;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    cursor: default;
-  }
-
-  .slot-event-info { flex: 1; min-width: 0; }
-
-  .slot-event-line {
-    display: flex;
-    gap: 6px;
-    align-items: baseline;
-  }
-
-  .slot-event-time {
-    font-weight: 700;
-    color: #3b6fe0;
-    flex-shrink: 0;
-  }
-
-  .slot-event-title {
-    font-weight: 600;
-    word-break: break-word;
-  }
-
-  .slot-event-desc {
-    font-size: 11.5px;
-    color: #6b7280;
-    margin-top: 2px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  .del-btn {
-    border: none;
-    background: #fdecec;
-    color: #d04545;
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
-    font-size: 13px;
-    line-height: 1;
-    cursor: pointer;
-    flex-shrink: 0;
-    padding: 0;
-  }
-  .del-btn:hover { background: #f8d7d7; }
-
-  /* ---------- Модальное окно ---------- */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(17,24,39,.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    z-index: 100;
-  }
-
-  .modal-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 22px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 50px rgba(0,0,0,.25);
-  }
-
-  .modal-card h3 { margin: 0 0 16px; font-size: 18px; }
-
-  .field { margin-bottom: 12px; }
-
-  .field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #4b5563;
-    margin-bottom: 5px;
-  }
-
-  .field input, .field textarea {
-    width: 100%;
-    border: 1px solid #d8dee9;
-    border-radius: 9px;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    background: #f8fafc;
-    transition: border-color .15s, background .15s;
-  }
-  .field input:focus, .field textarea:focus {
-    border-color: #3b6fe0;
-    background: #fff;
-  }
-  .field textarea { resize: vertical; min-height: 64px; }
-
-  .row { display: flex; gap: 10px; }
-  .row .field { flex: 1; }
-
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  @media (max-width: 480px) {
-    .day-head { flex-wrap: wrap; }
-    .day-nav { width: 100%; justify-content: space-between; }
-    .day-nav .btn-ghost { flex: 1; }
-    .hour-label { width: 46px; flex-basis: 46px; font-size: 11px; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Справочник по разметке проектов художественной гимнастики">
+    <title>Разметка проектов</title>
+    <!-- Подключаем шрифт Inter для соответствия макету -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="app">
-  <header>
-    <h1>📅 Мой календарь</h1>
-    <button class="btn btn-primary" id="addBtn">+ Добавить событие</button>
-  </header>
-
-  <!-- Экран: календарь на месяц -->
-  <section id="monthView" class="card">
-    <div class="month-nav">
-      <button class="nav-btn" id="prevBtn" title="Предыдущий месяц">‹</button>
-      <h2 id="monthTitle"></h2>
-      <button class="nav-btn" id="nextBtn" title="Следующий месяц">›</button>
-    </div>
-    <div class="weekdays">
-      <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div>
-      <div class="weekend">Сб</div><div class="weekend">Вс</div>
-    </div>
-    <div class="days" id="days"></div>
-  </section>
-
-  <!-- Экран: расписание на день -->
-  <section id="dayView" class="card hidden">
-    <div class="day-head">
-      <button class="btn btn-ghost" id="backBtn">← Назад</button>
-      <div class="day-nav-info">
-        <h2 id="dayTitle"></h2>
-        <div class="sub" id="daySub"></div>
-      </div>
-      <div class="day-nav">
-        <button class="btn btn-ghost" id="todayBtn" title="Перейти к сегодняшнему дню">Сегодня</button>
-        <button class="nav-btn" id="prevDayBtn" title="Предыдущий день">‹</button>
-        <button class="nav-btn" id="nextDayBtn" title="Следующий день">›</button>
-      </div>
-    </div>
-
-    <p class="hint">Нажмите на получасовой интервал, чтобы добавить событие на это время.</p>
-
-    <div class="timeline-wrap" id="timelineWrap">
-      <div class="timeline" id="timeline"></div>
-    </div>
-  </section>
-</div>
-
-<!-- Модальное окно добавления события -->
-<div class="modal hidden" id="modal">
-  <div class="modal-card">
-    <h3>Новое событие</h3>
-    <form id="eventForm">
-      <div class="field">
-        <label for="evTitle">Название</label>
-        <input type="text" id="evTitle" required placeholder="Например: Встреча с командой">
-      </div>
-      <div class="row">
-        <div class="field">
-          <label for="evDate">Дата</label>
-          <input type="date" id="evDate" required>
+    <!-- Боковое меню (в стиле нижней навигации из макета, но адаптированное) -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-circle">
+                <!-- Иконка гимнастки -->
+                <div class="icon-mask icon-gymnast"></div>
+            </div>
         </div>
-        <div class="field">
-          <label for="evTime">Время</label>
-          <input type="time" id="evTime" value="09:00">
-        </div>
-      </div>
-      <div class="field">
-        <label for="evDesc">Описание (необязательно)</label>
-        <textarea id="evDesc" placeholder="Детали события..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="cancelBtn">Отмена</button>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-/* ==================== Данные ==================== */
-const STORAGE_KEY = 'calendar-events-v1';
-
-// events = { "2025-01-15": [ { id, time, title, desc } ] }
-let events = {};
-try {
-  events = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-} catch (e) {
-  events = {};
-}
-
-function saveEvents() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-}
-
-/* ==================== Утилиты ==================== */
-const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь',
-                'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня',
-                    'июля','августа','сентября','октября','ноября','декабря'];
-const WEEKDAYS_FULL = ['воскресенье','понедельник','вторник','среда',
-                       'четверг','пятница','суббота'];
-
-const pad = n => String(n).padStart(2, '0');
-const dateKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const parseKey = k => new Date(k + 'T00:00:00');
-const todayKey = () => dateKey(new Date());
-
-/* Округляем время события вниз до получаса: "09:47" -> "09:30" */
-function slotKey(time) {
-  if (!time) return '00:00';
-  const parts = time.split(':');
-  const h = parseInt(parts[0], 10) || 0;
-  const m = parseInt(parts[1], 10) || 0;
-  return `${pad(Math.min(h, 23))}:${m < 30 ? '00' : '30'}`;
-}
-
-/* ==================== Состояние ==================== */
-let currentMonth = new Date();   // отображаемый месяц
-let selectedKey = null;          // выбранная дата (YYYY-MM-DD)
-
-/* ==================== Элементы ==================== */
-const monthView    = document.getElementById('monthView');
-const dayView      = document.getElementById('dayView');
-const daysGrid     = document.getElementById('days');
-const monthTitle   = document.getElementById('monthTitle');
-const dayTitle     = document.getElementById('dayTitle');
-const daySub       = document.getElementById('daySub');
-const timeline     = document.getElementById('timeline');
-const timelineWrap = document.getElementById('timelineWrap');
-const modal        = document.getElementById('modal');
-const form         = document.getElementById('eventForm');
-const evTitle      = document.getElementById('evTitle');
-const evDate       = document.getElementById('evDate');
-const evTime       = document.getElementById('evTime');
-const evDesc       = document.getElementById('evDesc');
-
-/* ==================== Отрисовка месяца ==================== */
-function renderMonth() {
-  const year  = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  monthTitle.textContent = `${MONTHS[month]} ${year}`;
-
-  const firstDay     = new Date(year, month, 1);
-  const offset       = (firstDay.getDay() + 6) % 7;     // Пн = 0
-  const daysInMonth  = new Date(year, month + 1, 0).getDate();
-  const daysInPrev   = new Date(year, month, 0).getDate();
-  const tKey         = todayKey();
-
-  const cells = [];
-  for (let i = offset - 1; i >= 0; i--) {
-    const d = new Date(year, month - 1, daysInPrev - i);
-    cells.push({ date: d, other: true });
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push({ date: new Date(year, month, d), other: false });
-  }
-  let nextDay = 1;
-  while (cells.length % 7 !== 0) {
-    cells.push({ date: new Date(year, month + 1, nextDay++), other: true });
-  }
-
-  daysGrid.innerHTML = '';
-
-  cells.forEach(({ date, other }) => {
-    const key = dateKey(date);
-    const el = document.createElement('div');
-    el.className = 'day';
-    if (other) el.classList.add('other');
-    if (key === tKey) el.classList.add('today');
-
-    const dow = (date.getDay() + 6) % 7;          // 5 = сб, 6 = вс
-    if (dow >= 5) el.classList.add('weekend');
-
-    const num = document.createElement('div');
-    num.className = 'num';
-    num.textContent = date.getDate();
-    el.appendChild(num);
-
-    const dayEvents = events[key] || [];
-    if (dayEvents.length) {
-      const dots = document.createElement('div');
-      dots.className = 'dots';
-      dayEvents.slice(0, 4).forEach(() => {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        dots.appendChild(dot);
-      });
-      el.appendChild(dots);
-    }
-
-    el.addEventListener('click', () => openDay(key));
-    daysGrid.appendChild(el);
-  });
-}
-
-/* ==================== Экран дня ==================== */
-function openDay(key) {
-  selectedKey = key;
-  monthView.classList.add('hidden');
-  dayView.classList.remove('hidden');
-  updateDayHeader();
-  renderTimeline();
-}
-
-function updateDayHeader() {
-  if (!selectedKey) return;
-  const d = parseKey(selectedKey);
-
-  dayTitle.textContent =
-    `${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
-
-  const isToday = selectedKey === todayKey();
-  daySub.textContent = WEEKDAYS_FULL[d.getDay()] + (isToday ? ' · сегодня' : '');
-
-  // Синхронизируем отображаемый месяц, чтобы «Назад» вёл в нужный месяц
-  currentMonth = new Date(d.getFullYear(), d.getMonth(), 1);
-}
-
-function shiftDay(delta) {
-  if (!selectedKey) return;
-  const d = parseKey(selectedKey);
-  d.setDate(d.getDate() + delta);
-  selectedKey = dateKey(d);
-  updateDayHeader();
-  renderTimeline();
-}
-
-/* ==================== Сетка времени ==================== */
-function createEventChip(ev) {
-  const chip = document.createElement('div');
-  chip.className = 'slot-event';
-  chip.title = ev.desc ? `${ev.title} — ${ev.desc}` : ev.title;
-  chip.addEventListener('click', e => e.stopPropagation());
-
-  const info = document.createElement('div');
-  info.className = 'slot-event-info';
-
-  const line = document.createElement('div');
-  line.className = 'slot-event-line';
-
-  const t = document.createElement('span');
-  t.className = 'slot-event-time';
-  t.textContent = ev.time || '—';
-
-  const title = document.createElement('span');
-  title.className = 'slot-event-title';
-  title.textContent = ev.title;
-
-  line.append(t, title);
-  info.appendChild(line);
-
-  if (ev.desc) {
-    const desc = document.createElement('div');
-    desc.className = 'slot-event-desc';
-    desc.textContent = ev.desc;
-    info.appendChild(desc);
-  }
-
-  const del = document.createElement('button');
-  del.className = 'del-btn';
-  del.textContent = '×';
-  del.title = 'Удалить событие';
-  del.addEventListener('click', e => {
-    e.stopPropagation();
-    if (!confirm(`Удалить событие «${ev.title}»?`)) return;
-
-    events[selectedKey] = (events[selectedKey] || []).filter(x => x.id !== ev.id);
-    if (!events[selectedKey].length) delete events[selectedKey];
-    saveEvents();
-    renderTimeline();
-    renderMonth();
-  });
-
-  chip.append(info, del);
-  return chip;
-}
-
-function renderTimeline() {
-  timeline.innerHTML = '';
-
-  // Группируем события по получасовым слотам
-  const bySlot = {};
-  (events[selectedKey] || []).forEach(ev => {
-    const sk = slotKey(ev.time);
-    (bySlot[sk] = bySlot[sk] || []).push(ev);
-  });
-  Object.values(bySlot).forEach(arr =>
-    arr.sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-  );
-
-  const now = new Date();
-  const isToday = selectedKey === todayKey();
-  const nowSlot = `${pad(now.getHours())}:${now.getMinutes() < 30 ? '00' : '30'}`;
-
-  for (let h = 0; h < 24; h++) {
-    const row = document.createElement('div');
-    row.className = 'hour-row';
-
-    const label = document.createElement('div');
-    label.className = 'hour-label';
-    label.textContent = `${pad(h)}:00`;
-    row.appendChild(label);
-
-    const slotsCol = document.createElement('div');
-    slotsCol.className = 'hour-slots';
-
-    ['00', '30'].forEach(min => {
-      const time = `${pad(h)}:${min}`;
-
-      const slot = document.createElement('div');
-      slot.className = 'slot';
-      slot.dataset.time = time;
-      if (isToday && time === nowSlot) slot.classList.add('now');
-
-      (bySlot[time] || []).forEach(ev => slot.appendChild(createEventChip(ev)));
-
-      slot.addEventListener('click', () => {
-        openModalFor(selectedKey, time);
-      });
-
-      slotsCol.appendChild(slot);
-    });
-
-    row.appendChild(slotsCol);
-    timeline.appendChild(row);
-  }
-
-  // Прокрутка к нужному часу
-  let targetHour = 8;
-  if (isToday) {
-    targetHour = now.getHours();
-  } else {
-    const times = (events[selectedKey] || [])
-      .map(e => e.time)
-      .filter(Boolean)
-      .sort();
-    if (times.length) targetHour = parseInt(times[0].split(':')[0], 10);
-  }
-  targetHour = Math.max(0, Math.min(23, targetHour));
-
-  requestAnimationFrame(() => {
-    const targetRow = timeline.children[targetHour];
-    if (targetRow) {
-      timelineWrap.scrollTop = Math.max(0, targetRow.offsetTop - 8);
-    }
-  });
-}
-
-/* ==================== Модальное окно ==================== */
-function openModalFor(key, time) {
-  evTitle.value = '';
-  evDesc.value = '';
-  evDate.value = key || todayKey();
-  evTime.value = time || '09:00';
-  modal.classList.remove('hidden');
-  setTimeout(() => evTitle.focus(), 50);
-}
-
-function closeModal() {
-  modal.classList.add('hidden');
-}
-
-form.addEventListener('submit', e => {
-  e.preventDefault();
-
-  const key = evDate.value;
-  if (!key) return;
-
-  const entry = {
-    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    time: evTime.value || '',
-    title: evTitle.value.trim() || 'Без названия',
-    desc: evDesc.value.trim()
-  };
-
-  (events[key] = events[key] || []).push(entry);
-  saveEvents();
-  closeModal();
-
-  renderMonth();
-  if (!dayView.classList.contains('hidden') && selectedKey === key) {
-    renderTimeline();
-  }
-});
-
-/* ==================== Обработчики ==================== */
-document.getElementById('addBtn').addEventListener('click', () => {
-  const key = (!dayView.classList.contains('hidden') && selectedKey)
-    ? selectedKey
-    : todayKey();
-  openModalFor(key, '09:00');
-});
-
-document.getElementById('cancelBtn').addEventListener('click', closeModal);
-
-modal.addEventListener('click', e => {
-  if (e.target === modal) closeModal();
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-    closeModal();
-    return;
-  }
-  if (dayView.classList.contains('hidden') || !modal.classList.contains('hidden')) return;
-  if (e.target.matches('input, textarea')) return;
-
-  if (e.key === 'ArrowLeft') {
-    shiftDay(-1);
-    e.preventDefault();
-  } else if (e.key === 'ArrowRight') {
-    shiftDay(1);
-    e.preventDefault();
-  }
-});
-
-document.getElementById('prevBtn').addEventListener('click', () => {
-  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-  renderMonth();
-});
-
-document.getElementById('nextBtn').addEventListener('click', () => {
-  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-  renderMonth();
-});
-
-document.getElementById('backBtn').addEventListener('click', () => {
-  dayView.classList.add('hidden');
-  monthView.classList.remove('hidden');
-  renderMonth();
-});
-
-document.getElementById('prevDayBtn').addEventListener('click', () => shiftDay(-1));
-document.getElementById('nextDayBtn').addEventListener('click', () => shiftDay(1));
-document.getElementById('todayBtn').addEventListener('click', () => openDay(todayKey()));
-
-/* ==================== Старт ==================== */
-renderMonth();
-</script>
+        
+        <nav class="sidebar-nav">
+            <a href="#home" class="nav-btn active" data-page="home" title="Главная">
+                <div class="icon-wrapper"><div class="icon-mask icon-home"></div></div>
+            </a>
+            
+            <!-- Кнопка "База знаний" с выпадающим окном -->
+            <div class="nav-group">
+                <button class="nav-btn" id="btn-knowledge" title="База знаний">
+                    <div class="icon-wrapper"><div class="icon-mask icon-book"></div></div>
+                </button>
+                <div class="flyout-menu" id="flyout-knowledge">
+                    <a href="#glossary" class="flyout-item" data-page="glossary">Глоссарий</a>
+                    <a href="#body-elements" class="flyout-item" data-page="body-elements">Элементы тела</a>
+                    <a href="#object-elements" class="flyout-item" data-page="object-elements">Работа с предметом</a>
+                </div>
+            </div>
+
+            <!-- Кнопка "Разметка проектов" с выпадающим окном -->
+            <div class="nav-group">
+                <button class="nav-btn" id="btn-projects" title="Разметка проектов">
+                    <div class="icon-wrapper"><div class="icon-mask icon-checklist"></div></div>
+                </button>
+                <div class="flyout-menu" id="flyout-projects">
+                    <a href="#gymnasts-august" class="flyout-item" data-page="gymnasts-august">Гимнастки август</a>
+                    <a href="#validation" class="flyout-item" data-page="validation">Валидация</a>
+                </div>
+            </div>
+
+            <a href="#sources" class="nav-btn" data-page="sources" title="Источники">
+                <div class="icon-wrapper"><div class="icon-mask icon-copyright"></div></div>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        
+        <!-- СТРАНИЦА: ГЛАВНАЯ -->
+        <section id="page-home" class="page active">
+            <header class="page-header">
+                <h1>Разметка проектов<br>по художественной гимнастике</h1>
+                <p>База знаний и инструкции</p>
+            </header>
+
+            <!-- Блок с локальными зашифрованными заметками -->
+            <div class="local-notes-widget">
+                <div class="notes-header">
+                    <h2>Мои заметки (Локально)</h2>
+                    <span class="security-badge">🔒 AES-GCM</span>
+                </div>
+                <p class="notes-desc">Заметки хранятся только на вашем устройстве в зашифрованном виде.</p>
+                
+                <div class="notes-input-area">
+                    <input type="text" id="note-input" placeholder="Введите новую заметку...">
+                    <button id="add-note-btn" class="btn-primary">Добавить</button>
+                </div>
+                <ul id="notes-list" class="notes-list">
+                    <!-- Сюда будут добавляться заметки через JS -->
+                </ul>
+            </div>
+
+            <!-- Карточки разделов -->
+            <div class="grid-cards">
+                <a href="#glossary" class="card" data-page="glossary">
+                    <div class="card-icon bg-slate"><div class="icon-mask icon-book"></div></div>
+                    <h3>Глоссарий</h3>
+                    <p>Термины и сокращения</p>
+                </a>
+                <a href="#gymnasts-august" class="card" data-page="gymnasts-august">
+                    <div class="card-icon bg-light"><div class="icon-mask icon-user"></div></div>
+                    <h3>Гимнастки август</h3>
+                    <p>Основные шаги</p>
+                </a>
+                <a href="#validation" class="card" data-page="validation">
+                    <div class="card-icon bg-slate"><div class="icon-mask icon-check"></div></div>
+                    <h3>Валидация</h3>
+                    <p>Проверка данных</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- ПРИМЕР ВНУТРЕННЕЙ СТРАНИЦЫ -->
+        <section id="page-glossary" class="page">
+            <header class="page-header">
+                <h1>Глоссарий</h1>
+                <p>Термины и их сокращения</p>
+            </header>
+            
+            <div class="content-card">
+                <h3>Технические термины</h3>
+                <ul class="styled-list">
+                    <li><strong>ХГ</strong> – Художественная гимнастика.</li>
+                    <li><strong>Кластер</strong> – зона группировки меток.</li>
+                    <li><strong>Таймкод</strong> – временная метка.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- СТРАНИЦА: ИСТОЧНИКИ -->
+        <section id="page-sources" class="page">
+            <header class="page-header">
+                <h1>Источники</h1>
+                <p>Благодарности</p>
+            </header>
+            <div class="content-card">
+                <ul class="styled-list">
+                    <li><strong>Иконки</strong> - Flaticon (DinosoftLabs, Magnific, zero_wing и др.)</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
