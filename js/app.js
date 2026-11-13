@@ -27,6 +27,9 @@ let currentDate = new Date();
 let selectedDate = new Date();
 let pickerDate = new Date();
 
+// Переменная для хранения состояния редактирования
+let editingEventInfo = null; // { dateKey, id }
+
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
 const formatDateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -56,6 +59,7 @@ const daySub = document.getElementById('daySub');
 const timelineWrapper = document.getElementById('timelineWrapper');
 
 const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
 const eventForm = document.getElementById('eventForm');
 const evTitle = document.getElementById('evTitle');
 const evDate = document.getElementById('evDate');
@@ -87,7 +91,7 @@ function renderMonth() {
     }
     
     // Дни текущего месяца
-    const todayKey = formatDateKey(new Date()); // Ключ текущего дня
+    const todayKey = formatDateKey(new Date());
     const selectedKey = formatDateKey(selectedDate);
     
     for (let i = 1; i <= lastDay.getDate(); i++) {
@@ -96,9 +100,7 @@ function renderMonth() {
         
         let classes = 'day-cell';
         
-        // Добавляем класс для текущего дня
         if (key === todayKey) classes += ' today';
-        // Добавляем класс для выбранного дня
         if (key === selectedKey) classes += ' selected';
         
         const dayEvents = events[key] || [];
@@ -167,11 +169,18 @@ function renderAgenda() {
     
     agendaList.innerHTML = dayEvents.map(ev => `
         <div class="event-card">
-            <span class="time">${ev.time}</span>
-            <span class="title">${ev.title}</span>
-            <button class="delete-btn" onclick="deleteEvent('${key}', '${ev.id}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
+            <div class="event-info">
+                <span class="time">${ev.time}</span>
+                <span class="title">${ev.title}</span>
+            </div>
+            <div class="event-actions">
+                <button class="action-btn edit" onclick="editEvent('${key}', '${ev.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
+                <button class="action-btn delete" onclick="deleteEvent('${key}', '${ev.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
         </div>
     `).join('');
 }
@@ -231,21 +240,49 @@ function renderDayView() {
 function renderTimelineEvent(ev, dateKey) {
     return `
         <div class="event-card">
-            <span class="time">${ev.time}</span>
-            <span class="title">${ev.title}</span>
-            <button class="delete-btn" onclick="event.stopPropagation(); deleteEvent('${dateKey}', '${ev.id}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
+            <div class="event-info">
+                <span class="time">${ev.time}</span>
+                <span class="title">${ev.title}</span>
+            </div>
+            <div class="event-actions">
+                <button class="action-btn edit" onclick="event.stopPropagation(); editEvent('${dateKey}', '${ev.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
+                <button class="action-btn delete" onclick="event.stopPropagation(); deleteEvent('${dateKey}', '${ev.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
         </div>
     `;
 }
 
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
 function openModal(dateKey, time) {
+    editingEventInfo = null; // Сбрасываем режим редактирования
+    modalTitle.textContent = 'Новое событие';
+    
     evTitle.value = '';
     evDesc.value = '';
     evDate.value = dateKey;
     evTime.value = time || '09:00';
+    
+    modal.classList.add('active');
+    setTimeout(() => evTitle.focus(), 300);
+}
+
+// Функция редактирования
+window.editEvent = (dateKey, id) => {
+    const ev = events[dateKey].find(e => e.id === id);
+    if (!ev) return;
+    
+    editingEventInfo = { dateKey, id };
+    modalTitle.textContent = 'Редактировать событие';
+    
+    evTitle.value = ev.title;
+    evDate.value = dateKey;
+    evTime.value = ev.time;
+    evDesc.value = ev.desc || '';
+    
     modal.classList.add('active');
     setTimeout(() => evTitle.focus(), 300);
 }
@@ -371,18 +408,39 @@ document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 monthPickerModal.addEventListener('click', (e) => { if (e.target === monthPickerModal) closeMonthPicker(); });
 
+// ОБРАБОТКА ФОРМЫ (Добавление и Обновление)
 eventForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const key = evDate.value;
-    if (!key) return;
     
-    if (!events[key]) events[key] = [];
-    events[key].push({
-        id: Date.now().toString(),
-        time: evTime.value,
-        title: evTitle.value.trim(),
-        desc: evDesc.value.trim()
-    });
+    const newDateKey = evDate.value;
+    if (!newDateKey) return;
+    
+    // Если мы в режиме редактирования
+    if (editingEventInfo) {
+        // 1. Удаляем старое событие из старого массива
+        events[editingEventInfo.dateKey] = events[editingEventInfo.dateKey].filter(ev => ev.id !== editingEventInfo.id);
+        if (events[editingEventInfo.dateKey].length === 0) delete events[editingEventInfo.dateKey];
+        
+        // 2. Добавляем обновленное в новый (или тот же) массив
+        if (!events[newDateKey]) events[newDateKey] = [];
+        events[newDateKey].push({
+            id: editingEventInfo.id,
+            time: evTime.value,
+            title: evTitle.value.trim(),
+            desc: evDesc.value.trim()
+        });
+        
+        editingEventInfo = null; // Сбрасываем
+    } else {
+        // Обычное добавление
+        if (!events[newDateKey]) events[newDateKey] = [];
+        events[newDateKey].push({
+            id: Date.now().toString(),
+            time: evTime.value,
+            title: evTitle.value.trim(),
+            desc: evDesc.value.trim()
+        });
+    }
     
     saveData(events);
     closeModal();
