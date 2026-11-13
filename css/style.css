@@ -50,6 +50,8 @@ body {
     overflow: hidden;
 }
 
+.hidden { display: none !important; }
+
 /* ==================== ШАПКА (HEADER) ==================== */
 .app-header {
     position: sticky;
@@ -60,13 +62,10 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 0 10px 0;
+    flex-shrink: 0;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+.header-left { display: flex; align-items: center; gap: 6px; }
 
 .icon-btn {
     background: var(--card-bg);
@@ -143,6 +142,7 @@ body {
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 10px;
+    flex-shrink: 0;
 }
 .weekdays .weekend { color: #b91c1c; }
 
@@ -181,20 +181,14 @@ body {
     transform: translateY(-2px);
 }
 
-.day-cell.today {
-    background-color: #7dd3fc; 
-    border-color: #0ea5e9; 
-}
+.day-cell.today { background-color: #7dd3fc; border-color: #0ea5e9; }
 
 .day-cell.selected {
     background-color: var(--dark-btn);
     border-color: var(--dark-border);
 }
 .day-cell.selected .day-number { color: white; }
-.day-cell.selected.today {
-    background-color: var(--dark-btn);
-    border-color: var(--dark-border);
-}
+.day-cell.selected.today { background-color: var(--dark-btn); border-color: var(--dark-border); }
 
 .day-number {
     font-size: 16px;
@@ -223,14 +217,49 @@ body {
 .dot:nth-child(3) { background-color: var(--dot-darkblue); }
 .day-cell.selected .dot { background-color: white; }
 
+/* ==================== ЛЕНТА НЕДЕЛИ (СВЕРНУТЫЙ КАЛЕНДАРЬ) ==================== */
+.week-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    scrollbar-width: none;
+    flex-shrink: 0;
+}
+.week-strip::-webkit-scrollbar { display: none; }
+
+.date-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 64px;
+    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.date-pill .pill-day { font-size: 15px; font-weight: 700; }
+.date-pill .pill-weekday { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 2px; color: var(--secondary-text); }
+
+.date-pill.active {
+    background: var(--dark-btn);
+    border-color: var(--dark-border);
+}
+.date-pill.active .pill-day { color: white; }
+.date-pill.active .pill-weekday { color: #cbd5e1; }
+
 /* ==================== БЛОК AGENDA (РАСПИСАНИЕ) ==================== */
 .agenda-section {
     background: var(--card-bg);
-    border-radius: 24px 24px 0 0;
+    border-radius: 24px; /* Закругления со всех сторон */
     padding: 20px 20px 0 20px;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
-    border-bottom: none;
+    margin-bottom: 20px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -240,34 +269,58 @@ body {
 .agenda-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px; /* Увеличили отступ, так как убрали ленту дат */
+    align-items: flex-start;
+    margin-bottom: 16px;
     flex-shrink: 0;
 }
 
-.today-label {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: var(--secondary-text);
-    text-transform: uppercase;
+.date-info {
+    display: flex;
+    flex-direction: column;
 }
 .date-large {
     font-size: 28px;
     font-weight: 800;
     line-height: 1.1;
 }
-.agenda-summary {
+.full-weekday {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--secondary-text);
+    margin-top: 2px;
+}
+
+.agenda-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.view-toggle-btn {
+    background: var(--accent-color);
+    border: 1px solid var(--dark-border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-text);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.view-toggle-btn:hover { background: var(--accent-hover); }
+
+.event-count {
     font-size: 12px;
     font-weight: 600;
     color: var(--secondary-text);
 }
 
-/* Таймлайн (Скроллируемая область) */
+/* Таймлайн */
 .timeline-wrapper {
     flex-grow: 1;
     overflow-y: auto;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     position: relative;
 }
 
@@ -276,6 +329,7 @@ body {
     display: flex;
     min-height: 80px;
     position: relative;
+    align-items: flex-start; /* Выравнивание по верхнему краю */
 }
 
 /* Метка времени слева */
@@ -287,16 +341,15 @@ body {
     color: var(--secondary-text);
     text-align: right;
     padding-right: 12px;
-    padding-top: 10px;
+    padding-top: 17px; /* Выровнено под текст карточки */
     position: relative;
 }
 
-/* Вертикальная линия с точкой */
 .time-label::after {
     content: '';
     position: absolute;
     right: -5px;
-    top: 14px;
+    top: 19px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -304,7 +357,7 @@ body {
     z-index: 2;
 }
 
-/* Правая часть (с линией и карточками) */
+/* Правая часть */
 .slot-content {
     flex-grow: 1;
     border-left: 2px solid #cbd5e1;
@@ -315,7 +368,7 @@ body {
     gap: 8px;
 }
 
-/* Кнопка "Добавить событие" в пустом слоте */
+/* Кнопка "Добавить событие" */
 .add-slot-btn {
     background: transparent;
     border: 2px dashed #cbd5e1;
@@ -338,6 +391,66 @@ body {
     border-color: var(--dark-border);
     color: var(--primary-text);
 }
+
+/* ==================== ВСТРОЕННАЯ ФОРМА (INLINE) ==================== */
+.inline-form {
+    background: var(--accent-color);
+    border: 1px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.inline-form input, .inline-form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    background: var(--card-bg);
+}
+.inline-form input:focus, .inline-form textarea:focus {
+    border-color: var(--dark-border);
+}
+
+.inline-form textarea {
+    resize: none;
+    height: 60px;
+}
+
+.inline-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.inline-actions button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.btn-save {
+    background: var(--dark-btn);
+    color: white;
+}
+.btn-save:hover { background: var(--dark-btn-hover); }
+
+.btn-cancel {
+    background: var(--card-bg);
+    color: var(--primary-text);
+    border-color: #cbd5e1;
+}
+.btn-cancel:hover { background: var(--accent-hover); }
 
 /* ==================== КАРТОЧКА СОБЫТИЯ ==================== */
 .timeline-card {
@@ -370,7 +483,6 @@ body {
     line-height: 1.4;
 }
 
-/* Круглые кнопки в правом верхнем углу */
 .event-actions {
     position: absolute;
     top: 12px;
