@@ -28,8 +28,8 @@ let selectedDate = new Date();
 let pickerDate = new Date();
 let editingEventInfo = null;
 
-let isCalendarExpanded = true; // Развернут ли календарь на весь месяц
-let inlineFormTime = null; // Время слота, в котором открыта форма
+let isCalendarExpanded = true; 
+let inlineFormTime = null;
 
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
@@ -61,6 +61,7 @@ const viewToggleBtn = document.getElementById('viewToggleBtn');
 const selectedDateLarge = document.getElementById('selectedDateLarge');
 const agendaWeekday = document.getElementById('agendaWeekday');
 const eventSummary = document.getElementById('eventSummary');
+const scheduleSection = document.getElementById('scheduleSection');
 const timelineWrapper = document.getElementById('timelineWrapper');
 
 const modal = document.getElementById('modal');
@@ -69,6 +70,7 @@ const eventForm = document.getElementById('eventForm');
 const evTitle = document.getElementById('evTitle');
 const evDate = document.getElementById('evDate');
 const evTime = document.getElementById('evTime');
+const evEndTime = document.getElementById('evEndTime');
 const evDesc = document.getElementById('evDesc');
 
 const monthPickerModal = document.getElementById('monthPickerModal');
@@ -76,7 +78,7 @@ const pickerYearLabel = document.getElementById('pickerYearLabel');
 const pickerMonthsGrid = document.getElementById('pickerMonthsGrid');
 const jumpToDateInput = document.getElementById('jumpToDateInput');
 
-// ==================== ГЕНЕРАЦИЯ ЯЧЕЙКИ ДНЯ ====================
+// ==================== ГЕНЕРАЦИЯ ЯЧЕЙКИ ====================
 function generateDayCellHTML(dateObj, todayKey, selectedKey) {
     const key = formatDateKey(dateObj);
     let classes = 'day-cell';
@@ -112,7 +114,6 @@ function renderMonth() {
     let daysHtml = '';
 
     if (isCalendarExpanded) {
-        // ПОЛНЫЙ МЕСЯЦ
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
@@ -132,10 +133,8 @@ function renderMonth() {
             daysHtml += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
         }
     } else {
-        // ТОЛЬКО ТЕКУЩАЯ НЕДЕЛЯ
         const startOfWeek = new Date(selectedDate);
         const dayOfWeek = startOfWeek.getDay();
-        // Получаем понедельник этой недели
         const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
         startOfWeek.setDate(diff);
 
@@ -148,12 +147,11 @@ function renderMonth() {
 
     daysGrid.innerHTML = daysHtml;
     
-    // Обработчики кликов по датам
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
-            currentDate = new Date(selectedDate); // Синхронизируем текущий месяц
+            currentDate = new Date(selectedDate); 
             inlineFormTime = null;
             renderMonth(); 
             renderAgenda();
@@ -161,7 +159,6 @@ function renderMonth() {
     });
 }
 
-// Переключение вида календаря
 viewToggleBtn.addEventListener('click', () => {
     isCalendarExpanded = !isCalendarExpanded;
     viewToggleBtn.textContent = isCalendarExpanded ? 'Расписание' : 'Календарь';
@@ -234,6 +231,7 @@ function renderAgenda() {
 
     timelineWrapper.innerHTML = timelineHtml;
 
+    // Скроллим весь блок scheduleSection к нужному часу
     setTimeout(() => {
         const now = new Date();
         let scrollHour = 8;
@@ -245,13 +243,14 @@ function renderAgenda() {
         
         const targetSlot = timelineWrapper.children[scrollHour * 2];
         if (targetSlot) {
-            timelineWrapper.scrollTop = targetSlot.offsetTop - 10;
+            const headerOffset = 100; // Примерная высота заголовка "13 Понедельник"
+            scheduleSection.scrollTop = targetSlot.offsetTop - headerOffset;
         }
     }, 50);
 }
 
 function renderTimelineCard(ev, dateKey) {
-    const endTime = addHourToTime(ev.time);
+    const endTime = ev.endTime || addHourToTime(ev.time); // Фоллбэк для старых записей
     return `
         <div class="timeline-card">
             <div class="event-actions">
@@ -297,10 +296,14 @@ window.saveInlineEvent = (dateKey, timeStr) => {
         return;
     }
     
+    // Добавляем событие длительностью 1 час
+    const endTime = addHourToTime(timeStr);
+    
     if (!events[dateKey]) events[dateKey] = [];
     events[dateKey].push({
         id: Date.now().toString(),
         time: timeStr,
+        endTime: endTime,
         title: title,
         desc: desc
     });
@@ -312,16 +315,22 @@ window.saveInlineEvent = (dateKey, timeStr) => {
     renderAgenda();
 };
 
+// ==================== МОДАЛЬНЫЕ ОКНА ====================
+// Кнопка "+" в шапке теперь вызывает модальное окно
 document.getElementById('addBtn').addEventListener('click', () => {
-    inlineFormTime = '09:00';
-    renderAgenda();
-    setTimeout(() => {
-        const input = document.getElementById('inlineTitle');
-        if (input) input.focus();
-    }, 100);
+    editingEventInfo = null;
+    modalTitle.textContent = 'Новое событие';
+    
+    evTitle.value = '';
+    evDesc.value = '';
+    evDate.value = formatDateKey(selectedDate);
+    evTime.value = '09:00';
+    evEndTime.value = '10:00';
+    
+    modal.classList.add('active');
+    setTimeout(() => evTitle.focus(), 300);
 });
 
-// ==================== МОДАЛЬНЫЕ ОКНА (РЕДАКТИРОВАНИЕ) ====================
 window.editEvent = (dateKey, id) => {
     const ev = events[dateKey].find(e => e.id === id);
     if (!ev) return;
@@ -332,6 +341,8 @@ window.editEvent = (dateKey, id) => {
     evTitle.value = ev.title;
     evDate.value = dateKey;
     evTime.value = ev.time;
+    // Если endTime нет, ставим +1 час
+    evEndTime.value = ev.endTime || addHourToTime(ev.time); 
     evDesc.value = ev.desc || '';
     
     modal.classList.add('active');
@@ -358,6 +369,13 @@ eventForm.addEventListener('submit', (e) => {
     const newDateKey = evDate.value;
     if (!newDateKey) return;
     
+    const eventData = {
+        time: evTime.value,
+        endTime: evEndTime.value,
+        title: evTitle.value.trim(),
+        desc: evDesc.value.trim()
+    };
+
     if (editingEventInfo) {
         events[editingEventInfo.dateKey] = events[editingEventInfo.dateKey].filter(ev => ev.id !== editingEventInfo.id);
         if (events[editingEventInfo.dateKey].length === 0) delete events[editingEventInfo.dateKey];
@@ -365,12 +383,16 @@ eventForm.addEventListener('submit', (e) => {
         if (!events[newDateKey]) events[newDateKey] = [];
         events[newDateKey].push({
             id: editingEventInfo.id,
-            time: evTime.value,
-            title: evTitle.value.trim(),
-            desc: evDesc.value.trim()
+            ...eventData
         });
         
         editingEventInfo = null;
+    } else {
+        if (!events[newDateKey]) events[newDateKey] = [];
+        events[newDateKey].push({
+            id: Date.now().toString(),
+            ...eventData
+        });
     }
     
     saveData(events);
