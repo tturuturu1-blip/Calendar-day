@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mobile Calendar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,7 +13,6 @@
         
         <!-- ==================== ЭКРАН 1: МЕСЯЦ ==================== -->
         <section id="monthView" class="view active">
-            <!-- Шапка закреплена (sticky) -->
             <header class="app-header">
                 <div class="header-left">
                     <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
@@ -45,28 +44,28 @@
                     </div>
                     <div class="agenda-summary">
                         <span id="eventSummary">0 событий</span>
-                        <button class="view-all-btn" id="goToDayBtn">Все</button>
+                        <button class="view-all-btn" id="goToDayBtn">Расписание</button>
                     </div>
                 </div>
                 <div class="agenda-list" id="agendaList"></div>
             </div>
         </section>
 
-        <!-- ==================== ЭКРАН 2: РАСПИСАНИЕ ДНЯ ==================== -->
+        <!-- ==================== ЭКРАН 2: РАСПИСАНИЕ ДНЯ (РЕФЕРЕНС) ==================== -->
         <section id="dayView" class="view">
             <header class="app-header day-header">
                 <button class="back-btn" id="backBtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
                 <div class="day-title">
-                    <h2 id="dayTitle">13 Ноября</h2>
-                    <span id="daySub">Среда</span>
-                </div>
-                <div class="day-nav">
-                    <button id="prevDayBtn">‹</button>
-                    <button id="nextDayBtn">›</button>
+                    <h2 id="dayTitle">Ноябрь</h2>
                 </div>
             </header>
+
+            <!-- Горизонтальная лента с датами -->
+            <div class="horizontal-dates" id="horizontalDates"></div>
+
+            <!-- Таймлайн событий -->
             <div class="timeline-wrapper" id="timelineWrapper"></div>
         </section>
 
