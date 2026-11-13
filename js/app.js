@@ -109,7 +109,6 @@ function renderMonth() {
         }
         dotsHtml += '</div>';
         
-        // Если событий нет, оставляем контейнер пустым (для сохранения высоты)
         if (dayEvents.length === 0) {
             dotsHtml = '<div class="dots-container"></div>';
         }
@@ -136,8 +135,15 @@ function renderMonth() {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
+            
+            // Обновляем состояние
             renderMonth(); 
             renderAgenda();
+
+            // ИСПРАВЛЕНИЕ: Возвращаем переход на экран дня при клике
+            monthView.classList.remove('active');
+            dayView.classList.add('active');
+            renderDayView();
         });
     });
 }
@@ -150,7 +156,6 @@ function renderAgenda() {
     
     dayEvents.sort((a, b) => a.time.localeCompare(b.time));
     
-    // Красивое склонение слова "событие"
     const count = dayEvents.length;
     let eventWord = 'событий';
     if (count % 10 === 1 && count % 100 !== 11) eventWord = 'событие';
