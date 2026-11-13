@@ -4,17 +4,21 @@
     --card-bg: #ffffff;
     --primary-text: #1c2b3a;
     --secondary-text: #8fa3b8;
-    --accent-color: #e8edf3; /* Светло-голубой для дат и событий */
+    --accent-color: #e8edf3; 
     --accent-hover: #d8e1eb;
     --dark-btn: #2c3e50;
-    --danger: #d9534f;
+    
+    /* Цвета для точек событий */
+    --dot-cyan: #00b4d8;
+    --dot-purple: #7209b7;
+    --dot-darkblue: #3a0ca3;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #d1d9e2; /* Фон вокруг телефона */
+    background-color: #d1d9e2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -42,7 +46,7 @@ body {
     display: none;
     flex-direction: column;
     height: 100%;
-    padding: 24px 20px 80px 20px; /* Отступ снизу для навигации */
+    padding: 24px 20px 80px 20px;
     overflow-y: auto;
 }
 .view.active { display: flex; }
@@ -92,43 +96,75 @@ body {
     margin-bottom: 30px;
 }
 
+/* ==================== СТИЛЬ ЯЧЕЙКИ ДНЯ (КАК НА КАРТИНКЕ) ==================== */
 .day-cell {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1.2; /* Делаем ячейку чуть вытянутой по вертикали */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--primary-text);
-    background-color: var(--accent-color);
+    background-color: #ffffff;
+    border: 1.5px solid #e0e5ec; /* Мягкая обводка */
+    border-radius: 16px; /* Сильное скругление */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02); /* Легкая тень */
     cursor: pointer;
     position: relative;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .day-cell.other-month {
     background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
     color: #bcc9d6;
 }
 
-.day-cell.selected {
-    background-color: var(--dark-btn);
-    color: white;
-    box-shadow: 0 4px 10px rgba(44, 62, 80, 0.3);
+.day-cell.other-month .day-number {
+    color: #bcc9d6;
 }
 
-/* Точка, если есть события */
-.day-cell.has-events::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: var(--dark-btn);
+/* Эффект при наведении и выборе */
+.day-cell:hover {
+    border-color: #b0c4de;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
 }
-.day-cell.selected.has-events::after { background-color: white; }
+.day-cell.selected {
+    border-color: var(--dark-btn);
+    background-color: var(--bg-color);
+    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+}
+
+/* Крупная цифра дня */
+.day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-text);
+    margin-bottom: 6px;
+    line-height: 1;
+}
+
+/* Контейнер для точек */
+.dots-container {
+    display: flex;
+    gap: 4px;
+    height: 6px; /* Фиксируем высоту, чтобы ячейки не прыгали, если нет точек */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Сами точки */
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Раскрашиваем точки по кругу (1-я голубая, 2-я фиолетовая, 3-я темно-синяя) */
+.dot:nth-child(3n+1) { background-color: var(--dot-cyan); }
+.dot:nth-child(3n+2) { background-color: var(--dot-purple); }
+.dot:nth-child(3n+3) { background-color: var(--dot-darkblue); }
+
 
 /* ==================== БЛОК AGENDA (НИЖНЯЯ ЧАСТЬ) ==================== */
 .agenda-section {
@@ -155,6 +191,7 @@ body {
     font-weight: 700;
     letter-spacing: 1px;
     color: var(--secondary-text);
+    text-transform: uppercase;
 }
 .date-large {
     font-size: 28px;
@@ -186,7 +223,7 @@ body {
     overflow-y: auto;
 }
 
-/* Карточка события (в списке и таймлайне) */
+/* Карточка события */
 .event-card {
     background: var(--accent-color);
     border-radius: 12px;
@@ -347,7 +384,7 @@ body {
     background: rgba(0,0,0,0.4);
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Выезжает снизу */
+    align-items: flex-end;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
