@@ -26,13 +26,15 @@ body {
     color: var(--primary-text);
     display: flex;
     justify-content: center;
+    height: 100vh;
+    height: 100dvh; /* Жестко фиксируем высоту для мобильных браузеров */
+    overflow: hidden; /* Отключаем скролл самой страницы */
 }
 
 .app-container {
     width: 100%;
     max-width: 500px;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
     background-color: var(--bg-color);
     position: relative;
     display: flex;
@@ -43,9 +45,9 @@ body {
 .view {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    padding: 0 20px 10px 20px;
-    overflow: hidden; /* Убираем общий скролл, скроллить будет только таймлайн */
+    flex-grow: 1; /* Контейнер занимает все доступное пространство */
+    padding: 0 20px;
+    overflow: hidden;
 }
 
 /* ==================== ШАПКА (HEADER) ==================== */
@@ -149,7 +151,7 @@ body {
     grid-template-columns: repeat(7, 1fr);
     gap: 6px;
     margin-bottom: 15px;
-    flex-shrink: 0; /* Чтобы сетка не сжималась */
+    flex-shrink: 0;
 }
 
 .day-cell {
@@ -224,15 +226,15 @@ body {
 /* ==================== БЛОК AGENDA (РАСПИСАНИЕ) ==================== */
 .agenda-section {
     background: var(--card-bg);
-    border-radius: 24px 24px 0 0; /* Скругляем только верх */
+    border-radius: 24px 24px 0 0;
     padding: 20px 20px 0 20px;
     box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
     border: 1px solid #cbd5e1;
     border-bottom: none;
-    flex-grow: 1;
+    flex-grow: 1; /* Растягиваем карточку до самого низа */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Важно для работы внутреннего скролла */
+    overflow: hidden;
 }
 
 .agenda-header {
@@ -372,14 +374,14 @@ body {
     color: var(--primary-text);
 }
 
-/* ==================== КАРТОЧКА СОБЫТИЯ (РЕФЕРЕНС) ==================== */
+/* ==================== КАРТОЧКА СОБЫТИЯ ==================== */
 .timeline-card {
     background: var(--card-bg);
     border-radius: 14px;
     padding: 16px 14px 14px 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     border: 1px solid #cbd5e1;
-    border-left: 6px solid var(--dot-cyan); /* Акцентная полоса */
+    border-left: 6px solid var(--dot-cyan);
     position: relative;
 }
 
@@ -388,7 +390,7 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 4px;
-    padding-right: 60px; /* Место для кнопок */
+    padding-right: 60px;
     line-height: 1.2;
 }
 .timeline-card .event-time-range {
