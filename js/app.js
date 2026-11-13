@@ -23,18 +23,22 @@ function saveData(data) {
 
 // ==================== СОСТОЯНИЕ ====================
 let events = loadData();
-let currentDate = new Date();   // Отображаемый месяц
-let selectedDate = new Date();  // Выбранный день для расписания
+let currentDate = new Date();
+let selectedDate = new Date();
 let pickerDate = new Date();
 let editingEventInfo = null;
+
+// Состояния для UI
+let isCalendarExpanded = true;
+let inlineFormTime = null; // Время слота, в котором открыта форма
 
 // ==================== УТИЛИТЫ ====================
 const pad = n => String(n).padStart(2, '0');
 const formatDateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const WEEKDAYS_SHORT = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+const WEEKDAYS_FULL = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
-// Округление времени вниз до получаса (например, 09:47 -> 09:30)
 function roundToHalfHour(timeStr) {
     if (!timeStr) return '00:00';
     let [h, m] = timeStr.split(':').map(Number);
@@ -53,11 +57,16 @@ function addHourToTime(timeStr) {
 // ==================== DOM ЭЛЕМЕНТЫ ====================
 const monthTitle = document.getElementById('monthTitle');
 const daysGrid = document.getElementById('daysGrid');
+const weekdaysHeader = document.getElementById('weekdaysHeader');
+const weekStrip = document.getElementById('weekStrip');
+const viewToggleBtn = document.getElementById('viewToggleBtn');
+
 const selectedDateLarge = document.getElementById('selectedDateLarge');
-const agendaDateLabel = document.getElementById('agendaDateLabel');
+const agendaWeekday = document.getElementById('agendaWeekday');
 const eventSummary = document.getElementById('eventSummary');
 const timelineWrapper = document.getElementById('timelineWrapper');
 
+// Элементы модалки (для редактирования)
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');
 const eventForm = document.getElementById('eventForm');
@@ -66,6 +75,7 @@ const evDate = document.getElementById('evDate');
 const evTime = document.getElementById('evTime');
 const evDesc = document.getElementById('evDesc');
 
+// Элементы выбора месяца
 const monthPickerModal = document.getElementById('monthPickerModal');
 const pickerYearLabel = document.getElementById('pickerYearLabel');
 const pickerMonthsGrid = document.getElementById('pickerMonthsGrid');
@@ -84,13 +94,11 @@ function renderMonth() {
     let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
     let daysHtml = '';
     
-    // Предыдущий месяц
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startOffset - 1; i >= 0; i--) {
         daysHtml += `<div class="day-cell other-month"><span class="day-number">${prevMonthLastDay - i}</span></div>`;
     }
     
-    // Текущий месяц
     const todayKey = formatDateKey(new Date());
     const selectedKey = formatDateKey(selectedDate);
     
@@ -121,7 +129,6 @@ function renderMonth() {
         `;
     }
     
-    // Следующий месяц
     const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
     const nextDaysNeeded = totalCells - (startOffset + lastDay.getDate());
     for (let i = 1; i <= nextDaysNeeded; i++) {
@@ -130,45 +137,88 @@ function renderMonth() {
     
     daysGrid.innerHTML = daysHtml;
     
-    // Обработчик клика по дате (обновляет только расписание)
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
-            
+            inlineFormTime = null; // Закрываем форму при смене даты
             renderMonth(); 
             renderAgenda();
         });
     });
 }
 
-// ==================== ОТРИСОВКА РАСПИСАНИЯ (ТАЙМЛАЙН) ====================
+// Отрисовка ленты недели (свернутый календарь)
+function renderWeekStrip() {
+    let html = '';
+    const startOfWeek = new Date(selectedDate);
+    const dayOfWeek = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
+    startOfWeek.setDate(diff);
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        const dKey = formatDateKey(d);
+        const isSelected = dKey === formatDateKey(selectedDate);
+        
+        html += `
+            <div class="date-pill ${isSelected ? 'active' : ''}" onclick="selectDateFromStrip('${dKey}')">
+                <span class="pill-day">${d.getDate()}</span>
+                <span class="pill-weekday">${WEEKDAYS_SHORT[d.getDay()]}</span>
+            </div>
+        `;
+    }
+    weekStrip.innerHTML = html;
+}
+
+window.selectDateFromStrip = (key) => {
+    const [y, m, d] = key.split('-');
+    selectedDate = new Date(y, m - 1, d);
+    currentDate = new Date(selectedDate);
+    inlineFormTime = null;
+    renderMonth();
+    renderAgenda();
+    renderWeekStrip();
+};
+
+// Переключение вида календаря
+viewToggleBtn.addEventListener('click', () => {
+    isCalendarExpanded = !isCalendarExpanded;
+    
+    if (isCalendarExpanded) {
+        weekdaysHeader.classList.remove('hidden');
+        daysGrid.classList.remove('hidden');
+        weekStrip.classList.add('hidden');
+        viewToggleBtn.textContent = 'Расписание';
+    } else {
+        weekdaysHeader.classList.add('hidden');
+        daysGrid.classList.add('hidden');
+        weekStrip.classList.remove('hidden');
+        viewToggleBtn.textContent = 'Календарь';
+        renderWeekStrip();
+    }
+});
+
+// ==================== ОТРИСОВКА РАСПИСАНИЯ ====================
 function renderAgenda() {
     const key = formatDateKey(selectedDate);
     const todayKey = formatDateKey(new Date());
     
-    // Обновляем шапку блока
     selectedDateLarge.textContent = selectedDate.getDate();
-    if (key === todayKey) {
-        agendaDateLabel.textContent = 'СЕГОДНЯ';
-    } else {
-        agendaDateLabel.textContent = WEEKDAYS_SHORT[selectedDate.getDay()];
-    }
+    agendaWeekday.textContent = WEEKDAYS_FULL[selectedDate.getDay()];
 
     const dayEvents = events[key] || [];
     dayEvents.sort((a, b) => a.time.localeCompare(b.time));
     
-    // Склонение
     const count = dayEvents.length;
     let eventWord = 'событий';
     if (count % 10 === 1 && count % 100 !== 11) eventWord = 'событие';
     else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
     eventSummary.textContent = `${count} ${eventWord}`;
 
-    // Вертикальный таймлайн (каждые полчаса)
     let timelineHtml = '';
     
-    // Группируем события по получасовым слотам
     const eventsBySlot = {};
     dayEvents.forEach(ev => {
         const slotTime = roundToHalfHour(ev.time);
@@ -176,21 +226,39 @@ function renderAgenda() {
         eventsBySlot[slotTime].push(ev);
     });
 
-    // Генерируем 48 слотов (24 часа * 2)
     for (let h = 0; h < 24; h++) {
         for (let m of ['00', '30']) {
             const timeStr = `${pad(h)}:${m}`;
             const slotEvents = eventsBySlot[timeStr] || [];
             
+            let slotContentHtml = slotEvents.map(ev => renderTimelineCard(ev, key)).join('');
+
+            // Если в этом слоте открыта форма добавления
+            if (inlineFormTime === timeStr) {
+                slotContentHtml += `
+                    <div class="inline-form">
+                        <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
+                        <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
+                        <div class="inline-actions">
+                            <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
+                            <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                slotContentHtml += `
+                    <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Добавить событие
+                    </button>
+                `;
+            }
+            
             timelineHtml += `
                 <div class="hour-slot">
                     <div class="time-label">${timeStr}</div>
                     <div class="slot-content">
-                        ${slotEvents.map(ev => renderTimelineCard(ev, key)).join('')}
-                        <button class="add-slot-btn" onclick="openModal('${key}', '${timeStr}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Добавить событие
-                        </button>
+                        ${slotContentHtml}
                     </div>
                 </div>
             `;
@@ -199,11 +267,15 @@ function renderAgenda() {
 
     timelineWrapper.innerHTML = timelineHtml;
 
-    // Прокрутка к текущему времени (если сегодня) или к 08:00
+    // Прокрутка к текущему времени или форме
     setTimeout(() => {
         const now = new Date();
         let scrollHour = 8;
-        if (key === todayKey) scrollHour = now.getHours();
+        if (key === todayKey && inlineFormTime === null) {
+            scrollHour = now.getHours();
+        } else if (inlineFormTime) {
+            scrollHour = parseInt(inlineFormTime.split(':')[0]);
+        }
         
         const targetSlot = timelineWrapper.children[scrollHour * 2];
         if (targetSlot) {
@@ -212,7 +284,6 @@ function renderAgenda() {
     }, 50);
 }
 
-// Шаблон карточки события
 function renderTimelineCard(ev, dateKey) {
     const endTime = addHourToTime(ev.time);
     return `
@@ -232,20 +303,62 @@ function renderTimelineCard(ev, dateKey) {
     `;
 }
 
-// ==================== МОДАЛЬНЫЕ ОКНА ====================
-function openModal(dateKey, time) {
-    editingEventInfo = null;
-    modalTitle.textContent = 'Новое событие';
-    
-    evTitle.value = '';
-    evDesc.value = '';
-    evDate.value = dateKey;
-    evTime.value = time || '09:00';
-    
-    modal.classList.add('active');
-    setTimeout(() => evTitle.focus(), 300);
-}
+// ==================== ВСТРОЕННАЯ ФОРМА (INLINE) ====================
+window.openInlineForm = (timeStr) => {
+    inlineFormTime = timeStr;
+    renderAgenda();
+    // Автофокус на поле ввода
+    setTimeout(() => {
+        const input = document.getElementById('inlineTitle');
+        if (input) input.focus();
+    }, 100);
+};
 
+window.closeInlineForm = () => {
+    inlineFormTime = null;
+    renderAgenda();
+};
+
+window.saveInlineEvent = (dateKey, timeStr) => {
+    const titleInput = document.getElementById('inlineTitle');
+    const descInput = document.getElementById('inlineDesc');
+    
+    const title = titleInput.value.trim();
+    const desc = descInput.value.trim();
+    
+    if (!title) {
+        alert('Пожалуйста, введите название события');
+        titleInput.focus();
+        return;
+    }
+    
+    if (!events[dateKey]) events[dateKey] = [];
+    events[dateKey].push({
+        id: Date.now().toString(),
+        time: timeStr,
+        title: title,
+        desc: desc
+    });
+    
+    saveData(events);
+    inlineFormTime = null;
+    
+    renderMonth(); // Обновляем точки на календаре
+    if (!isCalendarExpanded) renderWeekStrip();
+    renderAgenda(); // Перерисовываем таймлайн
+};
+
+// Кнопка "+" в шапке теперь открывает инлайн-форму на 09:00
+document.getElementById('addBtn').addEventListener('click', () => {
+    inlineFormTime = '09:00';
+    renderAgenda();
+    setTimeout(() => {
+        const input = document.getElementById('inlineTitle');
+        if (input) input.focus();
+    }, 100);
+});
+
+// ==================== МОДАЛЬНЫЕ ОКНА (РЕДАКТИРОВАНИЕ) ====================
 window.editEvent = (dateKey, id) => {
     const ev = events[dateKey].find(e => e.id === id);
     if (!ev) return;
@@ -259,8 +372,7 @@ window.editEvent = (dateKey, id) => {
     evDesc.value = ev.desc || '';
     
     modal.classList.add('active');
-    setTimeout(() => evTitle.focus(), 300);
-}
+};
 
 function closeModal() { modal.classList.remove('active'); }
 
@@ -271,8 +383,44 @@ window.deleteEvent = (dateKey, id) => {
     saveData(events);
     
     renderMonth();
+    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
 };
+
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+eventForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const newDateKey = evDate.value;
+    if (!newDateKey) return;
+    
+    if (editingEventInfo) {
+        events[editingEventInfo.dateKey] = events[editingEventInfo.dateKey].filter(ev => ev.id !== editingEventInfo.id);
+        if (events[editingEventInfo.dateKey].length === 0) delete events[editingEventInfo.dateKey];
+        
+        if (!events[newDateKey]) events[newDateKey] = [];
+        events[newDateKey].push({
+            id: editingEventInfo.id,
+            time: evTime.value,
+            title: evTitle.value.trim(),
+            desc: evDesc.value.trim()
+        });
+        
+        editingEventInfo = null;
+    }
+    
+    saveData(events);
+    closeModal();
+    
+    selectedDate = new Date(newDateKey + 'T00:00:00'); 
+    currentDate = new Date(selectedDate);
+    
+    renderMonth();
+    if (!isCalendarExpanded) renderWeekStrip();
+    renderAgenda();
+});
 
 // ==================== ВЫБОР МЕСЯЦА ====================
 function openMonthPicker() {
@@ -305,28 +453,6 @@ function updateMonthPickerUI() {
 
 function closeMonthPicker() { monthPickerModal.classList.remove('active'); }
 
-// ==================== ОБРАБОТЧИКИ ====================
-document.getElementById('prevMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderMonth();
-});
-document.getElementById('nextMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderMonth();
-});
-
-document.getElementById('todayBtn').addEventListener('click', () => {
-    const now = new Date();
-    currentDate = new Date(now);
-    selectedDate = new Date(now);
-    renderMonth();
-    renderAgenda();
-});
-
-document.getElementById('addBtn').addEventListener('click', () => {
-    openModal(formatDateKey(selectedDate), '09:00');
-});
-
 document.getElementById('monthPickerBtn').addEventListener('click', openMonthPicker);
 document.getElementById('closeMonthPickerBtn').addEventListener('click', closeMonthPicker);
 document.getElementById('pickerPrevYear').addEventListener('click', () => {
@@ -345,52 +471,31 @@ jumpToDateInput.addEventListener('change', (e) => {
     const newDate = new Date(y, m - 1, d);
     currentDate = new Date(newDate);
     selectedDate = new Date(newDate);
+    inlineFormTime = null;
     renderMonth();
+    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
     closeMonthPicker();
 });
-
-document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 monthPickerModal.addEventListener('click', (e) => { if (e.target === monthPickerModal) closeMonthPicker(); });
 
-eventForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const newDateKey = evDate.value;
-    if (!newDateKey) return;
-    
-    if (editingEventInfo) {
-        events[editingEventInfo.dateKey] = events[editingEventInfo.dateKey].filter(ev => ev.id !== editingEventInfo.id);
-        if (events[editingEventInfo.dateKey].length === 0) delete events[editingEventInfo.dateKey];
-        
-        if (!events[newDateKey]) events[newDateKey] = [];
-        events[newDateKey].push({
-            id: editingEventInfo.id,
-            time: evTime.value,
-            title: evTitle.value.trim(),
-            desc: evDesc.value.trim()
-        });
-        
-        editingEventInfo = null;
-    } else {
-        if (!events[newDateKey]) events[newDateKey] = [];
-        events[newDateKey].push({
-            id: Date.now().toString(),
-            time: evTime.value,
-            title: evTitle.value.trim(),
-            desc: evDesc.value.trim()
-        });
-    }
-    
-    saveData(events);
-    closeModal();
-    
-    // Синхронизируем дату
-    selectedDate = new Date(newDateKey + 'T00:00:00'); 
-    currentDate = new Date(selectedDate);
-    
+// ==================== НАВИГАЦИЯ ====================
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
     renderMonth();
+});
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderMonth();
+});
+
+document.getElementById('todayBtn').addEventListener('click', () => {
+    const now = new Date();
+    currentDate = new Date(now);
+    selectedDate = new Date(now);
+    inlineFormTime = null;
+    renderMonth();
+    if (!isCalendarExpanded) renderWeekStrip();
     renderAgenda();
 });
 
