@@ -11,8 +11,9 @@
 <body>
     <div class="app-container">
         
-        <!-- ==================== ЭКРАН 1: МЕСЯЦ ==================== -->
-        <section id="monthView" class="view active">
+        <!-- ==================== ЕДИНЫЙ ЭКРАН: КАЛЕНДАРЬ + РАСПИСАНИЕ ==================== -->
+        <section class="view active">
+            <!-- Закрепленная шапка -->
             <header class="app-header">
                 <div class="header-left">
                     <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
@@ -30,43 +31,32 @@
                 </div>
             </header>
 
+            <!-- Сетка календаря -->
             <div class="weekdays">
                 <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
             </div>
-            
             <div class="days-grid" id="daysGrid"></div>
 
+            <!-- Карточка с расписанием на выбранный день -->
             <div class="agenda-section">
                 <div class="agenda-header">
                     <div>
-                        <span class="today-label">СЕГОДНЯ</span>
+                        <span class="today-label" id="agendaDateLabel">СЕГОДНЯ</span>
                         <div class="date-large" id="selectedDateLarge">13</div>
                     </div>
                     <div class="agenda-summary">
                         <span id="eventSummary">0 событий</span>
-                        <button class="view-all-btn" id="goToDayBtn">Расписание</button>
                     </div>
                 </div>
-                <div class="agenda-list" id="agendaList"></div>
-            </div>
-        </section>
 
-        <!-- ==================== ЭКРАН 2: РАСПИСАНИЕ ДНЯ (РЕФЕРЕНС) ==================== -->
-        <section id="dayView" class="view">
-            <header class="app-header day-header">
-                <button class="back-btn" id="backBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <div class="day-title">
-                    <h2 id="dayTitle">Ноябрь</h2>
+                <!-- Горизонтальная лента с датами (для быстрого переключения) -->
+                <div class="horizontal-dates" id="horizontalDates"></div>
+
+                <!-- Вертикальный таймлайн -->
+                <div class="timeline-wrapper" id="timelineWrapper">
+                    <!-- Генерируется через JS -->
                 </div>
-            </header>
-
-            <!-- Горизонтальная лента с датами -->
-            <div class="horizontal-dates" id="horizontalDates"></div>
-
-            <!-- Таймлайн событий -->
-            <div class="timeline-wrapper" id="timelineWrapper"></div>
+            </div>
         </section>
 
     </div>
