@@ -1,10 +1,8 @@
 // ==================== КОНФИГУРАЦИЯ И ШИФРОВАНИЕ ====================
 const STORAGE_KEY = 'encrypted_calendar_data_v1';
-// В реальном приложении этот ключ должен генерироваться на основе пароля пользователя.
-// Для локального хранения без бэкенда используем статический ключ.
 const SECRET_KEY = 'MySuperSecretKey_For_LocalCalendar_2024';
 
-// Загрузка данных с расшифровкой
+// Загрузка данных с расшифровкой (AES)
 function loadData() {
     const encrypted = localStorage.getItem(STORAGE_KEY);
     if (!encrypted) return {};
@@ -37,7 +35,7 @@ const MONTHS_RU = ['Январь','Февраль','Март','Апрель','М
 const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WEEKDAYS = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
 
-// Округление времени до получаса (например, 09:20 -> 09:00, 09:40 -> 09:30)
+// Округление времени до получаса
 function roundToHalfHour(timeStr) {
     if (!timeStr) return '09:00';
     let [h, m] = timeStr.split(':').map(Number);
@@ -84,7 +82,7 @@ function renderMonth() {
     // Дни предыдущего месяца
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startOffset - 1; i >= 0; i--) {
-        daysHtml += `<div class="day-cell other-month">${prevMonthLastDay - i}</div>`;
+        daysHtml += `<div class="day-cell other-month"><span class="day-number">${prevMonthLastDay - i}</span></div>`;
     }
     
     // Дни текущего месяца
@@ -96,45 +94,69 @@ function renderMonth() {
         const key = formatDateKey(d);
         
         let classes = 'day-cell';
-        if (key === todayKey) classes += ' today'; // Можно стилизовать отдельно, но в макете просто выделен выбранный
         if (key === selectedKey) classes += ' selected';
         
+        // Получаем события для этого дня
         const dayEvents = events[key] || [];
-        if (dayEvents.length > 0) classes += ' has-events';
         
-        daysHtml += `<div class="${classes}" data-date="${key}">${i}</div>`;
+        // Генерируем точки (максимум 3, чтобы не ломать верстку)
+        let dotsHtml = '<div class="dots-container">';
+        const maxDots = 3;
+        const numDots = Math.min(dayEvents.length, maxDots);
+        
+        for (let j = 0; j < numDots; j++) {
+            dotsHtml += `<div class="dot"></div>`;
+        }
+        dotsHtml += '</div>';
+        
+        // Если событий нет, оставляем контейнер пустым (для сохранения высоты)
+        if (dayEvents.length === 0) {
+            dotsHtml = '<div class="dots-container"></div>';
+        }
+
+        daysHtml += `
+            <div class="${classes}" data-date="${key}">
+                <span class="day-number">${i}</span>
+                ${dotsHtml}
+            </div>
+        `;
     }
     
-    // Дни следующего месяца (добиваем до 42 ячеек для сетки)
+    // Дни следующего месяца
     const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
     const nextDaysNeeded = totalCells - (startOffset + lastDay.getDate());
     for (let i = 1; i <= nextDaysNeeded; i++) {
-        daysHtml += `<div class="day-cell other-month">${i}</div>`;
+        daysHtml += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
     }
     
     daysGrid.innerHTML = daysHtml;
     
-    // Добавляем обработчики кликов на дни
+    // Обработчики кликов на дни
     document.querySelectorAll('.day-cell:not(.other-month)').forEach(cell => {
         cell.addEventListener('click', () => {
             const [y, m, d] = cell.dataset.date.split('-');
             selectedDate = new Date(y, m - 1, d);
-            renderMonth(); // Перерисовываем для обновления выделения
+            renderMonth(); 
             renderAgenda();
         });
     });
 }
 
-// ==================== ОТРИСОВКА AGENDA (СПИСОК НА ВЫБРАННЫЙ ДЕНЬ) ====================
+// ==================== ОТРИСОВКА AGENDA ====================
 function renderAgenda() {
     selectedDateLarge.textContent = selectedDate.getDate();
     const key = formatDateKey(selectedDate);
     const dayEvents = events[key] || [];
     
-    // Сортируем по времени
     dayEvents.sort((a, b) => a.time.localeCompare(b.time));
     
-    eventSummary.textContent = `${dayEvents.length} events`;
+    // Красивое склонение слова "событие"
+    const count = dayEvents.length;
+    let eventWord = 'событий';
+    if (count % 10 === 1 && count % 100 !== 11) eventWord = 'событие';
+    else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
+    
+    eventSummary.textContent = `${count} ${eventWord}`;
     
     if (dayEvents.length === 0) {
         agendaList.innerHTML = '<div class="empty-state">Нет событий на этот день</div>';
@@ -188,18 +210,16 @@ function renderDayView() {
     // Обработчики кликов по пустым слотам
     document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', (e) => {
-            // Если кликнули по самой карточке события, не открываем модалку
             if (e.target.closest('.event-card')) return;
-            
             const time = slot.dataset.time;
             openModal(key, time);
         });
     });
     
-    // Прокрутка к текущему времени или первому событию
+    // Прокрутка
     setTimeout(() => {
         const now = new Date();
-        let scrollHour = 8; // по умолчанию
+        let scrollHour = 8; 
         if (formatDateKey(selectedDate) === formatDateKey(now)) {
             scrollHour = now.getHours();
         } else if (dayEvents.length > 0) {
@@ -256,14 +276,12 @@ window.deleteEvent = (dateKey, id) => {
 };
 
 // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
-// Переключение на экран дня
 document.getElementById('goToDayBtn').addEventListener('click', () => {
     monthView.classList.remove('active');
     dayView.classList.add('active');
     renderDayView();
 });
 
-// Назад к месяцу
 document.getElementById('backBtn').addEventListener('click', () => {
     dayView.classList.remove('active');
     monthView.classList.add('active');
@@ -271,7 +289,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
     renderAgenda();
 });
 
-// Навигация по дням на экране дня
 document.getElementById('prevDayBtn').addEventListener('click', () => {
     selectedDate.setDate(selectedDate.getDate() - 1);
     renderDayView();
@@ -282,22 +299,18 @@ document.getElementById('nextDayBtn').addEventListener('click', () => {
     renderDayView();
 });
 
-// Открытие модалки по кнопке +
 document.getElementById('addBtn').addEventListener('click', () => {
     const key = formatDateKey(selectedDate);
     openModal(key, '09:00');
 });
 
-// Закрытие модалки
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
 });
 
-// Сохранение события
 eventForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
     const key = evDate.value;
     if (!key) return;
     
@@ -313,7 +326,6 @@ eventForm.addEventListener('submit', (e) => {
     saveData(events);
     closeModal();
     
-    // Если мы на экране дня, обновляем таймлайн
     if (dayView.classList.contains('active')) {
         renderDayView();
     } else {
@@ -323,7 +335,6 @@ eventForm.addEventListener('submit', (e) => {
 });
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-// Устанавливаем сегодняшнюю дату при запуске
 selectedDate = new Date();
 renderMonth();
 renderAgenda();
