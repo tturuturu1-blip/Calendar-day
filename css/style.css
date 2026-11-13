@@ -1,14 +1,14 @@
 /* ==================== БАЗОВЫЕ СТИЛИ ==================== */
 :root {
-    /* Темный и контрастный фон */
-    --bg-color: #dce3eb; 
-    --body-bg: #aeb9c7;
+    /* Возвращен прежний светлый фон */
+    --bg-color: #f2f5f8; 
+    --body-bg: #d1d9e2;
     --card-bg: #ffffff;
     
-    --primary-text: #0f172a;
-    --secondary-text: #64748b;
-    --accent-color: #f1f5f9; 
-    --accent-hover: #e2e8f0;
+    --primary-text: #1c2b3a;
+    --secondary-text: #8fa3b8;
+    --accent-color: #e8edf3; 
+    --accent-hover: #d8e1eb;
     
     /* Темный контур для кнопок */
     --dark-border: #1e293b;
@@ -46,18 +46,22 @@ body {
     display: none;
     flex-direction: column;
     height: 100%;
-    padding: 24px 20px 40px 20px;
+    padding: 0 20px 40px 20px; /* Убрал верхний отступ, так как шапка sticky */
     overflow-y: auto;
 }
 .view.active { display: flex; }
 
-/* ==================== ШАПКА (HEADER) ==================== */
+/* ==================== ЗАКРЕПЛЕННАЯ ШАПКА (STICKY) ==================== */
 .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: var(--bg-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding-top: 10px;
+    padding: 20px 0 15px 0;
+    margin-bottom: 15px;
 }
 
 .header-left {
@@ -66,7 +70,6 @@ body {
     gap: 6px;
 }
 
-/* Тонкие (1px) обводки для всех кнопок */
 .icon-btn {
     background: var(--card-bg);
     border: 1px solid var(--dark-border);
@@ -152,23 +155,22 @@ body {
     margin-bottom: 30px;
 }
 
-/* Обводка для дней текущего месяца (тонкая, но заметная) */
+/* КРУГЛЫЕ ДАТЫ */
 .day-cell {
-    aspect-ratio: 1 / 1.15; 
+    aspect-ratio: 1 / 1; /* Идеальный круг */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: var(--card-bg);
-    border: 1px solid #94a3b8; /* Обводка дней текущего месяца */
-    border-radius: 14px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 50%; /* Круглая форма */
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
 }
 
-/* Для дней других месяцев обводку убираем */
 .day-cell.other-month {
     background-color: transparent;
     border-color: transparent;
@@ -178,14 +180,13 @@ body {
 
 .day-cell:hover {
     border-color: var(--dark-border);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
-/* ТЕКУЩИЙ ДЕНЬ (Яркий тонкий контур) */
+/* ТЕКУЩИЙ ДЕНЬ */
 .day-cell.today {
-    border: 1px solid var(--dot-cyan);
-    background-color: #e0f2fe;
-    box-shadow: 0 0 0 1px var(--dot-cyan); /* Тонкое свечение вместо толстой обводки */
+    background-color: #e0f2fe; 
+    border-color: #bae6fd; 
 }
 
 /* ВЫБРАННЫЙ ДЕНЬ */
@@ -197,30 +198,29 @@ body {
 
 /* Если выбранный день совпадает с сегодняшним */
 .day-cell.selected.today {
-    border: 1px solid var(--dot-cyan);
-    box-shadow: 0 0 0 1px var(--dot-cyan);
     background-color: var(--dark-btn);
+    border-color: var(--dark-border);
 }
 
 .day-number {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--primary-text);
-    margin-bottom: 4px;
     line-height: 1;
 }
 
 .dots-container {
     display: flex;
     gap: 3px;
-    height: 5px; 
+    height: 4px; 
     align-items: center;
     justify-content: center;
+    margin-top: 3px;
 }
 
 .dot {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     display: inline-block;
 }
@@ -228,7 +228,6 @@ body {
 .dot:nth-child(2) { background-color: var(--dot-purple); }
 .dot:nth-child(3) { background-color: var(--dot-darkblue); }
 
-/* В выбранном дне точки делаем белыми для контраста */
 .day-cell.selected .dot { background-color: white; }
 
 
@@ -295,28 +294,51 @@ body {
     overflow-y: auto;
 }
 
+/* ==================== КАРТОЧКА СОБЫТИЯ ==================== */
 .event-card {
     background: var(--accent-color);
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 12px 14px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.event-info {
+    display: flex;
     flex-direction: column;
     gap: 4px;
-    position: relative;
+    flex-grow: 1;
+    padding-right: 10px;
 }
 .event-card .time { font-size: 12px; font-weight: 600; }
 .event-card .title { font-size: 14px; font-weight: 700; text-transform: uppercase; }
-.event-card .delete-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    color: #ef4444;
-    cursor: pointer;
-    padding: 4px;
+
+/* Блок с кнопками действий (Редактировать / Удалить) */
+.event-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
+.action-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--dark-border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    padding: 0;
+}
+.action-btn.edit { color: var(--primary-text); }
+.action-btn.edit:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
+
+.action-btn.delete { color: #ef4444; }
+.action-btn.delete:hover { background: #fee2e2; border-color: #ef4444; }
 
 .empty-state {
     text-align: center;
@@ -404,7 +426,7 @@ body {
 }
 .slot:last-child { border-bottom: none; }
 .slot:hover { background: var(--bg-color); }
-.slot .event-card { margin: 2px 0; padding: 6px 10px; }
+.slot .event-card { margin: 4px 0; padding: 8px 10px; }
 
 /* ==================== МОДАЛЬНЫЕ ОКНА ==================== */
 .modal-overlay {
