@@ -2,137 +2,124 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Справочник по разметке проектов художественной гимнастики">
-    <title>Разметка проектов</title>
-    <!-- Подключаем шрифт Inter для соответствия макету -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Calendar</title>
+    <!-- Подключаем шрифт -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Подключаем библиотеку для шифрования данных -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Боковое меню (в стиле нижней навигации из макета, но адаптированное) -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-circle">
-                <!-- Иконка гимнастки -->
-                <div class="icon-mask icon-gymnast"></div>
-            </div>
-        </div>
+    <!-- Контейнер для мобильного вида -->
+    <div class="app-container">
         
-        <nav class="sidebar-nav">
-            <a href="#home" class="nav-btn active" data-page="home" title="Главная">
-                <div class="icon-wrapper"><div class="icon-mask icon-home"></div></div>
-            </a>
+        <!-- ==================== ЭКРАН 1: МЕСЯЦ ==================== -->
+        <section id="monthView" class="view active">
+            <header class="app-header">
+                <div class="month-selector">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span id="monthTitle">Февраль</span>
+                </div>
+                <div class="header-icons">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+            </header>
+
+            <div class="weekdays">
+                <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div class="weekend">Sa</div><div class="weekend">Su</div>
+            </div>
             
-            <!-- Кнопка "База знаний" с выпадающим окном -->
-            <div class="nav-group">
-                <button class="nav-btn" id="btn-knowledge" title="База знаний">
-                    <div class="icon-wrapper"><div class="icon-mask icon-book"></div></div>
-                </button>
-                <div class="flyout-menu" id="flyout-knowledge">
-                    <a href="#glossary" class="flyout-item" data-page="glossary">Глоссарий</a>
-                    <a href="#body-elements" class="flyout-item" data-page="body-elements">Элементы тела</a>
-                    <a href="#object-elements" class="flyout-item" data-page="object-elements">Работа с предметом</a>
-                </div>
+            <div class="days-grid" id="daysGrid">
+                <!-- Дни генерируются через JS -->
             </div>
 
-            <!-- Кнопка "Разметка проектов" с выпадающим окном -->
-            <div class="nav-group">
-                <button class="nav-btn" id="btn-projects" title="Разметка проектов">
-                    <div class="icon-wrapper"><div class="icon-mask icon-checklist"></div></div>
-                </button>
-                <div class="flyout-menu" id="flyout-projects">
-                    <a href="#gymnasts-august" class="flyout-item" data-page="gymnasts-august">Гимнастки август</a>
-                    <a href="#validation" class="flyout-item" data-page="validation">Валидация</a>
+            <!-- Нижняя панель с расписанием на выбранный день -->
+            <div class="agenda-section">
+                <div class="agenda-header">
+                    <div>
+                        <span class="today-label">TODAY</span>
+                        <div class="date-large" id="selectedDateLarge">25</div>
+                    </div>
+                    <div class="agenda-summary">
+                        <span id="eventSummary">0 events</span>
+                        <button class="view-all-btn" id="goToDayBtn">View all</button>
+                    </div>
+                </div>
+                <div class="agenda-list" id="agendaList">
+                    <!-- Список событий на выбранный день -->
                 </div>
             </div>
+        </section>
 
-            <a href="#sources" class="nav-btn" data-page="sources" title="Источники">
-                <div class="icon-wrapper"><div class="icon-mask icon-copyright"></div></div>
-            </a>
+        <!-- ==================== ЭКРАН 2: РАСПИСАНИЕ ДНЯ (ТАЙМЛАЙН) ==================== -->
+        <section id="dayView" class="view">
+            <header class="app-header day-header">
+                <button class="back-btn" id="backBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <div class="day-title">
+                    <h2 id="dayTitle">25 Февраля</h2>
+                    <span id="daySub">Понедельник</span>
+                </div>
+                <div class="day-nav">
+                    <button id="prevDayBtn">‹</button>
+                    <button id="nextDayBtn">›</button>
+                </div>
+            </header>
+
+            <div class="timeline-wrapper" id="timelineWrapper">
+                <!-- Таймлайн генерируется через JS -->
+            </div>
+        </section>
+
+        <!-- Плавающая кнопка добавления -->
+        <button class="fab" id="addBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+
+        <!-- Нижняя навигация (декоративная, для стиля) -->
+        <nav class="bottom-nav">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <svg class="active-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         </nav>
-    </aside>
+    </div>
 
-    <!-- Основной контент -->
-    <main class="main-content">
-        
-        <!-- СТРАНИЦА: ГЛАВНАЯ -->
-        <section id="page-home" class="page active">
-            <header class="page-header">
-                <h1>Разметка проектов<br>по художественной гимнастике</h1>
-                <p>База знаний и инструкции</p>
-            </header>
-
-            <!-- Блок с локальными зашифрованными заметками -->
-            <div class="local-notes-widget">
-                <div class="notes-header">
-                    <h2>Мои заметки (Локально)</h2>
-                    <span class="security-badge">🔒 AES-GCM</span>
+    <!-- Модальное окно добавления/редактирования события -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новое событие</h3>
+                <button id="closeModalBtn">&times;</button>
+            </div>
+            <form id="eventForm">
+                <div class="input-group">
+                    <label>Название</label>
+                    <input type="text" id="evTitle" required placeholder="Например: Встреча">
                 </div>
-                <p class="notes-desc">Заметки хранятся только на вашем устройстве в зашифрованном виде.</p>
-                
-                <div class="notes-input-area">
-                    <input type="text" id="note-input" placeholder="Введите новую заметку...">
-                    <button id="add-note-btn" class="btn-primary">Добавить</button>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Дата</label>
+                        <input type="date" id="evDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Время</label>
+                        <input type="time" id="evTime" required>
+                    </div>
                 </div>
-                <ul id="notes-list" class="notes-list">
-                    <!-- Сюда будут добавляться заметки через JS -->
-                </ul>
-            </div>
+                <div class="input-group">
+                    <label>Описание</label>
+                    <textarea id="evDesc" placeholder="Детали события..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Сохранить</button>
+            </form>
+        </div>
+    </div>
 
-            <!-- Карточки разделов -->
-            <div class="grid-cards">
-                <a href="#glossary" class="card" data-page="glossary">
-                    <div class="card-icon bg-slate"><div class="icon-mask icon-book"></div></div>
-                    <h3>Глоссарий</h3>
-                    <p>Термины и сокращения</p>
-                </a>
-                <a href="#gymnasts-august" class="card" data-page="gymnasts-august">
-                    <div class="card-icon bg-light"><div class="icon-mask icon-user"></div></div>
-                    <h3>Гимнастки август</h3>
-                    <p>Основные шаги</p>
-                </a>
-                <a href="#validation" class="card" data-page="validation">
-                    <div class="card-icon bg-slate"><div class="icon-mask icon-check"></div></div>
-                    <h3>Валидация</h3>
-                    <p>Проверка данных</p>
-                </a>
-            </div>
-        </section>
-
-        <!-- ПРИМЕР ВНУТРЕННЕЙ СТРАНИЦЫ -->
-        <section id="page-glossary" class="page">
-            <header class="page-header">
-                <h1>Глоссарий</h1>
-                <p>Термины и их сокращения</p>
-            </header>
-            
-            <div class="content-card">
-                <h3>Технические термины</h3>
-                <ul class="styled-list">
-                    <li><strong>ХГ</strong> – Художественная гимнастика.</li>
-                    <li><strong>Кластер</strong> – зона группировки меток.</li>
-                    <li><strong>Таймкод</strong> – временная метка.</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- СТРАНИЦА: ИСТОЧНИКИ -->
-        <section id="page-sources" class="page">
-            <header class="page-header">
-                <h1>Источники</h1>
-                <p>Благодарности</p>
-            </header>
-            <div class="content-card">
-                <ul class="styled-list">
-                    <li><strong>Иконки</strong> - Flaticon (DinosoftLabs, Magnific, zero_wing и др.)</li>
-                </ul>
-            </div>
-        </section>
-
-    </main>
-
-    <script src="js/script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
