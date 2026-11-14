@@ -300,7 +300,6 @@ body {
     position: relative;
     display: grid;
     grid-template-columns: 45px 1fr;
-    /* 48 строк по 30 минут. minmax позволяет строкам растягиваться под контент */
     grid-template-rows: repeat(48, minmax(80px, auto)); 
     width: 100%;
 }
@@ -320,7 +319,7 @@ body {
     grid-column: 1;
     text-align: right;
     padding-right: 12px;
-    padding-top: 8px;
+    padding-top: 6px; /* Выровнено под текст */
     font-size: 12px;
     font-weight: 700;
     color: #000000;
@@ -328,11 +327,11 @@ body {
     z-index: 2;
 }
 
-/* Точка на линии */
+/* Точка на линии (центр совпадает с линией) */
 .time-dot {
     position: absolute;
-    right: -4px;
-    top: 12px;
+    right: -4px; /* Сдвиг для центрирования на 2px линии */
+    top: 14px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -340,12 +339,12 @@ body {
     z-index: 2;
 }
 
-/* Кнопка "+" четко по центру под временем */
+/* Кнопка "+" под временем */
 .small-add-btn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    top: 26px;
+    top: 30px; /* Опущена ниже времени */
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -362,16 +361,26 @@ body {
 }
 .small-add-btn:hover { background: var(--accent-hover); }
 
-/* Фоновая ячейка слота (содержит линию и кнопку добавления) */
+/* Фоновая ячейка слота */
 .time-slot-bg {
     grid-column: 2;
-    border-top: 1px dashed #000000;
-    padding-top: 10px;
-    padding-left: 15px;
     position: relative;
+    padding-top: 32px; /* Отступ для контента ниже линии */
+    padding-left: 15px;
     z-index: 1;
     display: flex;
     flex-direction: column;
+}
+
+/* Горизонтальная разделительная линия (теперь это псевдоэлемент) */
+.time-slot-bg::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 18px; /* Идеально по центру точки (14px + 4px) */
+    border-top: 1px dashed #000000;
+    z-index: 1;
 }
 
 /* Кнопка "Добавить событие" в пустом слоте */
@@ -391,7 +400,6 @@ body {
     transition: all 0.2s;
     width: 100%;
     min-height: 44px;
-    margin-top: 5px;
 }
 .add-slot-btn:hover {
     background: var(--card-bg);
@@ -410,7 +418,6 @@ body {
     gap: 8px;
     width: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    margin-top: 5px;
 }
 
 .inline-form input, .inline-form textarea {
@@ -450,10 +457,10 @@ body {
 .btn-cancel { background: var(--bg-color); color: var(--primary-text); border-color: #cbd5e1; }
 .btn-cancel:hover { background: var(--accent-hover); }
 
-/* ==================== КАРТОЧКА СОБЫТИЯ (GRID ITEM) ==================== */
+/* ==================== КАРТОЧКА СОБЫТИЯ ==================== */
 .event-card {
     grid-column: 2;
-    margin: 15px 10px 10px 15px; /* Отступ сверху, чтобы не задевать линию */
+    margin: 30px 10px 10px 15px; /* Отступ сверху 30px, чтобы быть ниже линии */
     background: var(--card-bg);
     border-radius: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
