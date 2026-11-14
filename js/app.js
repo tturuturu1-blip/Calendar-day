@@ -206,11 +206,15 @@ window.toggleEventExpand = (id, event) => {
     } else {
         expandedEvents.add(id);
     }
-    renderAgenda();
+    // Передаем true, чтобы сохранить позицию скролла
+    renderAgenda(true);
 };
 
 // ==================== ОТРИСОВКА РАСПИСАНИЯ ====================
-function renderAgenda() {
+function renderAgenda(keepScroll = false) {
+    // Сохраняем текущую позицию скролла
+    const prevScrollTop = scheduleSection.scrollTop;
+
     const key = formatDateKey(selectedDate);
     const todayKey = formatDateKey(new Date());
     
@@ -228,7 +232,7 @@ function renderAgenda() {
 
     const SLOT_HEIGHT = 80;
     const TOTAL_SLOTS = 48;
-    const TOP_OFFSET = 20; // Сдвиг карточки ровно под линию
+    const TOP_OFFSET = 20;
 
     const parsedEvents = dayEvents.map(ev => {
         const [sh, sm] = ev.time.split(':').map(Number);
@@ -242,7 +246,6 @@ function renderAgenda() {
         const topPx = (startMins / 30) * SLOT_HEIGHT + TOP_OFFSET;
         const durationMins = endMins - startMins;
         
-        // Используем базовую высоту, но она будет растягиваться за счет min-height
         const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - TOP_OFFSET - 4);
 
         return { ...ev, endTimeStr, startMins, endMins, topPx, heightPx };
@@ -300,7 +303,6 @@ function renderAgenda() {
     let eventsHtml = '';
     parsedEvents.forEach(ev => {
         const isExpanded = expandedEvents.has(ev.id);
-        // Используем min-height вместо height, чтобы карточка растягивалась под контент
         const heightStyle = isExpanded ? '' : `min-height: ${ev.heightPx}px; height: auto;`;
         
         const hasDesc = ev.desc && ev.desc.trim().length > 0;
@@ -348,31 +350,37 @@ function renderAgenda() {
         </div>
     `;
 
-    // Прокрутка
-    setTimeout(() => {
-        const stickyHeader = document.querySelector('.agenda-header');
-        const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
-        
-        if (inlineFormTime) {
-            const [h, m] = inlineFormTime.split(':').map(Number);
-            const targetTop = ((h * 60 + m) / 30) * SLOT_HEIGHT;
-            scheduleSection.scrollTop = targetTop - headerHeight - 20;
-        } else if (key === todayKey) {
-            const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const targetTop = (currentMinutes / 30) * SLOT_HEIGHT;
-            scheduleSection.scrollTop = targetTop - headerHeight - 20;
-        } else if (parsedEvents.length > 0) {
-            scheduleSection.scrollTop = parsedEvents[0].topPx - headerHeight - 20;
-        } else {
-            scheduleSection.scrollTop = (8 * 60 / 30) * SLOT_HEIGHT - headerHeight - 20;
-        }
-    }, 50);
+    if (keepScroll) {
+        // Восстанавливаем сохраненную позицию
+        scheduleSection.scrollTop = prevScrollTop;
+    } else {
+        // Автоматическая прокрутка к нужному времени
+        setTimeout(() => {
+            const stickyHeader = document.querySelector('.agenda-header');
+            const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
+            
+            if (inlineFormTime) {
+                const [h, m] = inlineFormTime.split(':').map(Number);
+                const targetTop = ((h * 60 + m) / 30) * SLOT_HEIGHT;
+                scheduleSection.scrollTop = targetTop - headerHeight - 20;
+            } else if (key === todayKey) {
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const targetTop = (currentMinutes / 30) * SLOT_HEIGHT;
+                scheduleSection.scrollTop = targetTop - headerHeight - 20;
+            } else if (parsedEvents.length > 0) {
+                scheduleSection.scrollTop = parsedEvents[0].topPx - headerHeight - 20;
+            } else {
+                scheduleSection.scrollTop = (8 * 60 / 30) * SLOT_HEIGHT - headerHeight - 20;
+            }
+        }, 50);
+    }
 }
 
 // ==================== ОБРАБОТКА ФОРМ ====================
 window.openInlineForm = (timeStr) => {
     inlineFormTime = timeStr;
+    // Не сохраняем скролл, так как нужно прокрутить к форме
     renderAgenda();
     setTimeout(() => {
         const input = document.getElementById('inlineTitle');
@@ -382,7 +390,7 @@ window.openInlineForm = (timeStr) => {
 
 window.closeInlineForm = () => {
     inlineFormTime = null;
-    renderAgenda();
+    renderAgenda(true); // Сохраняем позицию при отмене
 };
 
 window.saveInlineEvent = (dateKey, timeStr) => {
@@ -413,7 +421,7 @@ window.saveInlineEvent = (dateKey, timeStr) => {
     inlineFormTime = null;
     
     renderMonth(); 
-    renderAgenda();
+    renderAgenda(true); // Сохраняем позицию, так как мы уже на нужном слоте
 };
 
 window.openSmallAddModal = (timeStr) => {
@@ -483,7 +491,7 @@ window.confirmDelete = () => {
     
     closeDeleteModal();
     renderMonth();
-    renderAgenda();
+    renderAgenda(true); // Сохраняем позицию при удалении
 };
 
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
@@ -528,7 +536,7 @@ eventForm.addEventListener('submit', (e) => {
     currentDate = new Date(selectedDate);
     
     renderMonth();
-    renderAgenda();
+    renderAgenda(); // Автоскролл к добавленному/измененному событию
 });
 
 // ==================== ВЫБОР МЕСЯЦА ====================
