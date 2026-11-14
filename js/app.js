@@ -206,13 +206,11 @@ window.toggleEventExpand = (id, event) => {
     } else {
         expandedEvents.add(id);
     }
-    // Передаем true, чтобы сохранить позицию скролла
     renderAgenda(true);
 };
 
 // ==================== ОТРИСОВКА РАСПИСАНИЯ ====================
 function renderAgenda(keepScroll = false) {
-    // Сохраняем текущую позицию скролла
     const prevScrollTop = scheduleSection.scrollTop;
 
     const key = formatDateKey(selectedDate);
@@ -230,10 +228,6 @@ function renderAgenda(keepScroll = false) {
     else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) eventWord = 'события';
     eventSummary.textContent = `${count} ${eventWord}`;
 
-    const SLOT_HEIGHT = 80;
-    const TOTAL_SLOTS = 48;
-    const TOP_OFFSET = 20;
-
     const parsedEvents = dayEvents.map(ev => {
         const [sh, sm] = ev.time.split(':').map(Number);
         const startMins = sh * 60 + sm;
@@ -243,18 +237,22 @@ function renderAgenda(keepScroll = false) {
         let endMins = eh * 60 + em;
         if (endMins <= startMins) endMins += 24 * 60;
 
-        const topPx = (startMins / 30) * SLOT_HEIGHT + TOP_OFFSET;
-        const durationMins = endMins - startMins;
-        
-        const heightPx = Math.max(20, (durationMins / 30) * SLOT_HEIGHT - TOP_OFFSET - 4);
+        // Вычисляем стартовую строку в Grid (от 1 до 48)
+        const startRow = Math.floor(startMins / 30) + 1;
+        // Вычисляем конечную строку в Grid
+        const endRow = Math.ceil(endMins / 30) + 1;
+        // Сколько строк занимает событие
+        const rowSpan = Math.max(1, endRow - startRow);
 
-        return { ...ev, endTimeStr, startMins, endMins, topPx, heightPx };
+        return { ...ev, endTimeStr, startMins, endMins, startRow, rowSpan };
     });
 
     parsedEvents.sort((a, b) => a.startMins - b.startMins);
 
     let gridHtml = `<div class="vertical-line"></div>`;
-    for (let i = 0; i < TOTAL_SLOTS; i++) {
+    
+    // Генерируем 48 строк (по 30 минут)
+    for (let i = 0; i < 48; i++) {
         const timeStr = `${pad(Math.floor(i/2))}:${i % 2 === 0 ? '00' : '30'}`;
         const slotStartMin = i * 30;
         const slotEndMin = slotStartMin + 30;
@@ -265,34 +263,30 @@ function renderAgenda(keepScroll = false) {
         const isFormOpen = (inlineFormTime === timeStr);
 
         gridHtml += `
-            <div class="time-row" style="top: ${i * SLOT_HEIGHT}px;">
-                <div class="time-label">${timeStr}</div>
+            <div class="time-label" style="grid-row: ${i + 1};">
+                ${timeStr}
                 <div class="time-dot"></div>
-                
                 ${isOccupied && !isFormOpen ? `
                     <button class="small-add-btn" onclick="openSmallAddModal('${timeStr}')" title="Добавить событие">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 ` : ''}
-                
+            </div>
+            <div class="time-slot-bg" style="grid-row: ${i + 1};">
                 ${!isOccupied && !isFormOpen ? `
-                    <div class="empty-slot-content">
-                        <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Добавить событие
-                        </button>
-                    </div>
+                    <button class="add-slot-btn" onclick="openInlineForm('${timeStr}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Добавить событие
+                    </button>
                 ` : ''}
                 
                 ${isFormOpen ? `
-                    <div class="inline-form-wrapper" style="top: ${TOP_OFFSET}px;">
-                        <div class="inline-form">
-                            <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
-                            <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
-                            <div class="inline-actions">
-                                <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
-                                <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
-                            </div>
+                    <div class="inline-form">
+                        <input type="text" id="inlineTitle" placeholder="Название события" autocomplete="off">
+                        <textarea id="inlineDesc" placeholder="Описание (необязательно)"></textarea>
+                        <div class="inline-actions">
+                            <button class="btn-cancel" onclick="closeInlineForm()">Отмена</button>
+                            <button class="btn-save" onclick="saveInlineEvent('${key}', '${timeStr}')">Сохранить</button>
                         </div>
                     </div>
                 ` : ''}
@@ -303,7 +297,6 @@ function renderAgenda(keepScroll = false) {
     let eventsHtml = '';
     parsedEvents.forEach(ev => {
         const isExpanded = expandedEvents.has(ev.id);
-        const heightStyle = isExpanded ? '' : `min-height: ${ev.heightPx}px; height: auto;`;
         
         const hasDesc = ev.desc && ev.desc.trim().length > 0;
         const toggleBtnHtml = hasDesc ? `
@@ -312,9 +305,10 @@ function renderAgenda(keepScroll = false) {
             </button>
         ` : '';
 
+        // Карточка события теперь Grid Item
         eventsHtml += `
-            <div class="absolute-event-card ${isExpanded ? 'expanded' : ''}" 
-                 style="top: ${ev.topPx}px; ${heightStyle}">
+            <div class="event-card ${isExpanded ? 'expanded' : ''}" 
+                 style="grid-row: ${ev.startRow} / span ${ev.rowSpan};">
                 <div class="event-card-header">
                     <div class="event-title-row">
                         <div class="event-title">${ev.title}</div>
@@ -340,38 +334,36 @@ function renderAgenda(keepScroll = false) {
     });
 
     timelineWrapper.innerHTML = `
-        <div class="timeline-container" style="height: ${TOTAL_SLOTS * SLOT_HEIGHT}px;">
-            <div class="timeline-grid-layer">
-                ${gridHtml}
-            </div>
-            <div class="timeline-events-layer">
-                ${eventsHtml}
-            </div>
+        <div class="timeline-container">
+            ${gridHtml}
+            ${eventsHtml}
         </div>
     `;
 
     if (keepScroll) {
-        // Восстанавливаем сохраненную позицию
         scheduleSection.scrollTop = prevScrollTop;
     } else {
-        // Автоматическая прокрутка к нужному времени
         setTimeout(() => {
             const stickyHeader = document.querySelector('.agenda-header');
             const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
             
+            // Прокрутка по примерной высоте (80px на 30 минут)
             if (inlineFormTime) {
                 const [h, m] = inlineFormTime.split(':').map(Number);
-                const targetTop = ((h * 60 + m) / 30) * SLOT_HEIGHT;
+                const targetTop = ((h * 60 + m) / 30) * 80;
                 scheduleSection.scrollTop = targetTop - headerHeight - 20;
             } else if (key === todayKey) {
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                const targetTop = (currentMinutes / 30) * SLOT_HEIGHT;
+                const targetTop = (currentMinutes / 30) * 80;
                 scheduleSection.scrollTop = targetTop - headerHeight - 20;
             } else if (parsedEvents.length > 0) {
-                scheduleSection.scrollTop = parsedEvents[0].topPx - headerHeight - 20;
+                // Прокрутка к первому событию (приблизительно)
+                const firstEv = parsedEvents[0];
+                const targetTop = ((firstEv.startMins) / 30) * 80;
+                scheduleSection.scrollTop = targetTop - headerHeight - 20;
             } else {
-                scheduleSection.scrollTop = (8 * 60 / 30) * SLOT_HEIGHT - headerHeight - 20;
+                scheduleSection.scrollTop = (8 * 60 / 30) * 80 - headerHeight - 20;
             }
         }, 50);
     }
@@ -380,7 +372,6 @@ function renderAgenda(keepScroll = false) {
 // ==================== ОБРАБОТКА ФОРМ ====================
 window.openInlineForm = (timeStr) => {
     inlineFormTime = timeStr;
-    // Не сохраняем скролл, так как нужно прокрутить к форме
     renderAgenda();
     setTimeout(() => {
         const input = document.getElementById('inlineTitle');
@@ -390,7 +381,7 @@ window.openInlineForm = (timeStr) => {
 
 window.closeInlineForm = () => {
     inlineFormTime = null;
-    renderAgenda(true); // Сохраняем позицию при отмене
+    renderAgenda(true);
 };
 
 window.saveInlineEvent = (dateKey, timeStr) => {
@@ -421,7 +412,7 @@ window.saveInlineEvent = (dateKey, timeStr) => {
     inlineFormTime = null;
     
     renderMonth(); 
-    renderAgenda(true); // Сохраняем позицию, так как мы уже на нужном слоте
+    renderAgenda(true);
 };
 
 window.openSmallAddModal = (timeStr) => {
@@ -491,7 +482,7 @@ window.confirmDelete = () => {
     
     closeDeleteModal();
     renderMonth();
-    renderAgenda(true); // Сохраняем позицию при удалении
+    renderAgenda(true);
 };
 
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
@@ -536,7 +527,7 @@ eventForm.addEventListener('submit', (e) => {
     currentDate = new Date(selectedDate);
     
     renderMonth();
-    renderAgenda(); // Автоскролл к добавленному/измененному событию
+    renderAgenda();
 });
 
 // ==================== ВЫБОР МЕСЯЦА ====================
