@@ -7,9 +7,9 @@
     <link rel="icon" type="image/png" href="icon/gimnastka.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="menu-open">
+<body>
 
-    <!-- БОКОВОЕ МЕНЮ -->
+    <!-- БОКОВОЕ МЕНЮ (ВСЕГДА СВЕРНУТОЕ НА ПК) -->
     <aside class="sidebar" id="sidebar">
         <nav class="sidebar-nav">
             <a href="#" class="nav-btn active" onclick="navigate('home')" id="nav-home">
@@ -51,8 +51,9 @@
         <!-- ШАПКА -->
         <header>
             <div class="header-left">
-                <div class="header-logo-area" onclick="toggleMenu()">
-                    <div class="header-logo-icon" title="Открыть/Скрыть меню">
+                <!-- Убрали onclick, иконка больше не переключает меню -->
+                <div class="header-logo-area">
+                    <div class="header-logo-icon">
                         <div class="nav-icon-img icon-gymnast"></div>
                     </div>
                     <div class="logo-text">РАЗМЕТКА<br>ГИМНАСТОК</div>
@@ -70,7 +71,6 @@
             <div id="page-home" class="page active">
                 <div class="hero-split">
                     <div class="hero-text">
-                        <!-- Измененный заголовок -->
                         <h1>РАЗМЕТКА ПРОЕКТОВ<br>ПО ГИМНАСТИКЕ</h1>
                         <p>База знаний и инструкции</p>
                     </div>
