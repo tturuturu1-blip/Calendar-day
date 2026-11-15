@@ -2,48 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Справочник по разметке проектов гимнастики: глоссарий, элементы тела, работа с предметом, критерии DA, валидация выступлений.">
     <title>Разметка гимнасток</title>
     <link rel="icon" type="image/png" href="icon/gimnastka.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-    <!-- БОКОВОЕ МЕНЮ (ВСЕГДА СВЕРНУТОЕ НА ПК) -->
-    <aside class="sidebar" id="sidebar">
-        <nav class="sidebar-nav">
-            <a href="#" class="nav-btn active" onclick="navigate('home')" id="nav-home">
-                <div class="nav-icon-wrapper"><div class="nav-icon-img icon-home"></div></div>
-                <span class="nav-text">Главная</span>
-            </a>
-            
-            <details class="nav-group">
-                <summary>
-                    <div class="nav-icon-wrapper"><div class="nav-icon-img icon-gymnast"></div></div>
-                    <span class="nav-text">База знаний</span>
-                    <span class="summary-arrow nav-text">▼</span>
-                </summary>
-                <div class="sub-nav">
-                    <a href="#" class="nav-btn" onclick="navigate('glossary')" id="nav-glossary">Глоссарий</a>
-                    <a href="#" class="nav-btn" onclick="navigate('body-elements')" id="nav-body-elements">Элементы тела</a>
-                    <a href="#" class="nav-btn" onclick="navigate('object-elements')" id="nav-object-elements">Работа с предметом</a>
-                    <a href="#" class="nav-btn" onclick="navigate('da')" id="nav-da">DA</a>
-                </div>
-            </details>
-
-            <details class="nav-group">
-                <summary>
-                    <div class="nav-icon-wrapper"><div class="nav-icon-img icon-validation"></div></div>
-                    <span class="nav-text">Разметка</span>
-                    <span class="summary-arrow nav-text">▼</span>
-                </summary>
-                <div class="sub-nav">
-                    <a href="#" class="nav-btn" onclick="navigate('gymnasts-august')" id="nav-gymnasts-august">Гимнастки август</a>
-                    <a href="#" class="nav-btn" onclick="navigate('validation')" id="nav-validation">Валидация</a>
-                </div>
-            </details>
-        </nav>
-    </aside>
 
     <!-- ОБЕРТКА ДЛЯ КОНТЕНТА -->
     <div class="main-wrapper">
@@ -51,70 +16,458 @@
         <!-- ШАПКА -->
         <header>
             <div class="header-left">
-                <!-- Убрали onclick, иконка больше не переключает меню -->
                 <div class="header-logo-area">
                     <div class="header-logo-icon">
-                        <div class="nav-icon-img icon-gymnast"></div>
+                        <div class="nav-icon-img icon-gymnast" aria-hidden="true"></div>
                     </div>
-                    <div class="logo-text">РАЗМЕТКА<br>ГИМНАСТОК</div>
+                    <div class="logo-text">СПРАВОЧНИК<br>ПО РАЗМЕТКЕ</div>
                 </div>
             </div>
             
             <div class="header-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" placeholder="Поиск...">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="search" placeholder="Поиск..." aria-label="Поиск по сайту">
             </div>
         </header>
 
-        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <!-- ЛЕВОЕ БОКОВОЕ МЕНЮ -->
+        <aside class="sidebar" id="sidebar" aria-label="Основная навигация">
+            <nav class="sidebar-nav">
+                <a href="#home" class="nav-btn active" data-page="home" id="nav-home" aria-current="page" title="Главная">
+                    <div class="icon-wrapper">
+                        <div class="nav-icon-img icon-home" aria-hidden="true"></div>
+                        <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </div>
+                    <span class="nav-text">Главная</span>
+                </a>
+
+                <details class="nav-group">
+                    <summary title="База знаний">
+                        <div class="icon-wrapper">
+                            <div class="nav-icon-img icon-knowledgebase" aria-hidden="true"></div>
+                            <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <span class="nav-text">База знаний</span>
+                        <span class="summary-arrow nav-text" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="sub-nav">
+                        <div class="flyout-title">База знаний</div>
+                        <a href="#glossary" class="nav-btn" data-page="glossary" id="nav-glossary">Глоссарий</a>
+                        <a href="#body-elements" class="nav-btn" data-page="body-elements" id="nav-body-elements">Элементы тела</a>
+                        <a href="#object-elements" class="nav-btn" data-page="object-elements" id="nav-object-elements">Работа с предметом</a>
+                        <a href="#da" class="nav-btn" data-page="da" id="nav-da">DA</a>
+                    </div>
+                </details>
+
+                <details class="nav-group">
+                    <summary title="Разметка проектов">
+                        <div class="icon-wrapper">
+                            <div class="nav-icon-img icon-projects" aria-hidden="true"></div>
+                            <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </div>
+                        <span class="nav-text">Разметка проектов</span>
+                        <span class="summary-arrow nav-text" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="sub-nav">
+                        <div class="flyout-title">Разметка проектов</div>
+                        <a href="#gymnasts-august" class="nav-btn" data-page="gymnasts-august" id="nav-gymnasts-august">Гимнастки август</a>
+                        <a href="#gymnasts-apparatus" class="nav-btn" data-page="gymnasts-apparatus" id="nav-gymnasts-apparatus">Разметка с предметом</a>
+                        <a href="#gymnastics-prep" class="nav-btn" data-page="gymnastics-prep" id="nav-gymnastics-prep">Подготовка выступлений</a>
+                        <a href="#gymnastics-check" class="nav-btn" data-page="gymnastics-check" id="nav-gymnastics-check">Гимнастика проверка</a>
+                        <a href="#validation" class="nav-btn" data-page="validation" id="nav-validation">Валидация выступлений</a>
+                    </div>
+                </details>
+
+                <a href="#sources" class="nav-btn" data-page="sources" id="nav-sources" title="Источники">
+                    <div class="icon-wrapper">
+                        <div class="nav-icon-img icon-copyright" aria-hidden="true"></div>
+                        <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M14.83 14.83a4 4 0 1 1 0-5.66"></path></svg>
+                    </div>
+                    <span class="nav-text">Источники</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- КОНТЕНТ -->
         <main>
+            <!-- СТРАНИЦА: ГЛАВНАЯ -->
             <div id="page-home" class="page active">
                 <div class="hero-split">
-                    <div class="hero-text">
-                        <h1>РАЗМЕТКА ПРОЕКТОВ<br>ПО ГИМНАСТИКЕ</h1>
-                        <p>База знаний и инструкции</p>
-                    </div>
                     <div class="hero-image-container">
-                        <div class="hero-decor-1"></div>
-                        <div class="hero-decor-2"></div>
+                        <div class="hero-decor-1" aria-hidden="true"></div>
+                        <div class="hero-decor-2" aria-hidden="true"></div>
                         <div class="hero-img-wrapper">
-                            <img src="images/websiteheader.jpg" alt="Гимнастка">
+                            <img src="images/websiteheader.jpg" alt="Гимнастка" width="450" height="550">
                         </div>
+                    </div>
+                    <div class="hero-text">
+                        <h1>РАЗМЕТКА ПРОЕКТОВ ПО<br>ХУДОЖЕСТВЕННОЙ ГИМНАСТИКЕ</h1>
+                        <p>База знаний и инструкции</p>
                     </div>
                 </div>
 
-                <div class="home-grid">
-                    <div class="home-card" onclick="navigate('glossary')">
-                        <div class="card-icon-circle bg-orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                        </div>
-                        <div><h3>Глоссарий</h3><p>Термины и их сокращения, используемые в разметке.</p></div>
-                        <div class="arrow">→</div>
+                <!-- РАЗДЕЛ: БАЗА ЗНАНИЙ -->
+                <section class="home-section">
+                    <h2 class="section-title">База знаний</h2>
+                    <div class="home-grid">
+                        <a href="#glossary" class="home-card" data-page="glossary">
+                            <div class="card-icon-circle bg-orange" aria-hidden="true">
+                                <div class="nav-icon-img icon-glossary"></div>
+                                <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h3>Глоссарий</h3>
+                                <p>Термины и их сокращения, используемые в разметке.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
+                        
+                        <a href="#body-elements" class="home-card" data-page="body-elements">
+                            <div class="card-icon-circle bg-green" aria-hidden="true">
+                                <div class="nav-icon-img icon-gymnast"></div>
+                                <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6 12h12"></path><path d="M12 5v14"></path><path d="M8 22l4-5 4 5"></path></svg>
+                            </div>
+                            <div>
+                                <h3>Элементы тела</h3>
+                                <p>Описание равновесий, вращений, прыжков и других элементов.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
+                        
+                        <a href="#object-elements" class="home-card" data-page="object-elements">
+                            <div class="card-icon-circle bg-dark" aria-hidden="true">
+                                <div class="nav-icon-img icon-ball"></div>
+                                <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
+                            </div>
+                            <div>
+                                <h3>Работа с предметом</h3>
+                                <p>Информация о разметке элементов с предметами.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
+                        
+                        <a href="#da" class="home-card" data-page="da">
+                            <div class="card-icon-circle bg-orange" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                            <div>
+                                <h3>DA</h3>
+                                <p>Критерии элементов DA и особенности их разметки.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
                     </div>
-                    <div class="home-card" onclick="navigate('body-elements')">
-                        <div class="card-icon-circle bg-green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6 12h12"></path><path d="M12 5v14"></path><path d="M8 22l4-5 4 5"></path></svg>
-                        </div>
-                        <div><h3>Элементы тела</h3><p>Описание равновесий, вращений, прыжков и других элементов.</p></div>
-                        <div class="arrow">→</div>
+                </section>
+
+                <!-- РАЗДЕЛ: РАЗМЕТКА ПРОЕКТОВ -->
+                <section class="home-section">
+                    <h2 class="section-title">Разметка проектов</h2>
+                    <div class="home-grid">
+                        <a href="#gymnasts-august" class="home-card" data-page="gymnasts-august">
+                            <div class="card-icon-circle bg-green" aria-hidden="true">
+                                <div class="nav-icon-img icon-gymnasts-august"></div>
+                                <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <div>
+                                <h3>Гимнастки август</h3>
+                                <p>Общая информация и основные шаги в разметке.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
+                        
+                        <a href="#validation" class="home-card" data-page="validation">
+                            <div class="card-icon-circle bg-dark" aria-hidden="true">
+                                <div class="nav-icon-img icon-validation-new"></div>
+                                <svg class="fallback-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                            </div>
+                            <div>
+                                <h3>Валидация</h3>
+                                <p>Инструкция по проверке и исправлению данных на карте кластеров.</p>
+                            </div>
+                            <div class="arrow">→</div>
+                        </a>
                     </div>
-                    <div class="home-card" onclick="navigate('validation')">
-                        <div class="card-icon-circle bg-dark">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: ГЛОССАРИЙ -->
+            <div id="page-glossary" class="page">
+                <div class="hero-text page-header">
+                    <h1>ГЛОССАРИЙ</h1>
+                    <p>Термины и их сокращения</p>
+                </div>
+                <section class="section">
+                    <details class="content-acc" open>
+                        <summary>Термины и их сокращения</summary>
+                        <div class="details-content">
+                            <h4>Технические термины</h4>
+                            <ul>
+                                <li><strong>ХГ</strong> – сокращение от «Художественная гимнастика».</li>
+                                <li><strong>Кластер</strong> – это зона, в которой группируются метки (точки) со схожими скелетом действия. Кластеры создаются динамически с помощью алгоритмов группировки.</li>
+                                <li><strong>Метка (точка)</strong> – это структурированный описательный идентификатор (набор характеристик), присвоенный фрагменту данных (в нашем случае, фрагменту видео).</li>
+                                <li><strong>Таймкод</strong> – временная метка, в формате «мм:сс.мсмсмс».</li>
+                                <li><strong>Фрагмент</strong> – отрезок, выделяемый на видео цветным боксом на протяжении всего времени выполнения действия и имеющий две временные метки: таймкод начала и таймкод конца. Фрагмент помимо временных меток содержит также описательную информацию о выполняемом гимнасткой действии: класс и название действия и чек-боксы.</li>
+                                <li><strong>Действие</strong> – движение тела спортсменки (в том числе статичное), относящиеся к определенной группе действий.</li>
+                                <li><strong>Класс действий</strong> – собирательный термин, характеризующий набор различных «действий», выполняемых гимнасткой во время выступления. К ним относятся: Техническое, Равновесие, Вращение, Прыжок, Преакробатический элемент, Вертикальное вращение, Динамический элемент с вращением R, Танцевальные шаги.</li>
+                                <li><strong>Действие прервано</strong> – действие спортсменки, которое не было выполнено в полной мере согласно правилам художественной гимнастики в связи с потерей предмета, потерей равновесия / падением или другими причинами.</li>
+                            </ul>
+                            <h4>Спортивные термины</h4>
+                            <ul>
+                                <li><strong>Релеве</strong> – движение стопы опорной ноги, подъём на полу пальцы с отрывом пятки от пола.</li>
+                                <li><strong>Турлян</strong> – медленный поворот вокруг себя на одной ноге без касания пола другой ногой осуществляемый за счет перемещения пятки при подъеме на релеве (не считается вращением).</li>
+                                <li><strong>Плие</strong> – сгибание одной либо обеих ног / приседание на двух либо на одной ноге.</li>
+                                <li><strong>Динамическое равновесие</strong> – выполняются плавными последовательными движениями с переходом одной формы в другую без остановки в любой части равновесия.</li>
+                                <li><strong>Элемент</strong> – это минимальная, технически законченная единица движения, которая имеет четко описанную технику выполнения и официально зафиксированную стоимость в Таблицах правил Международной федерации гимнастики.</li>
+                                <li><strong>Элементы DB</strong> – это Прыжки, Равновесия и Вращения.</li>
+                                <li><strong>Элементы DA</strong> – технически сложная манипуляция с предметом, которая состоит из работы с предметом с выполнением во время нее минимум 2 критериев.</li>
+                                <li><strong>Полупальцы</strong> – положение стопы, при котором спортсменка отрывает пятку от пола и стоит, опираясь исключительно на переднюю часть стопы опорной ноги: подушечку и пальцы.</li>
+                            </ul>
                         </div>
-                        <div><h3>Валидация</h3><p>Инструкция по проверке и исправлению данных на карте кластеров.</p></div>
-                        <div class="arrow">→</div>
-                    </div>
+                    </details>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: ЭЛЕМЕНТЫ ТЕЛА -->
+            <div id="page-body-elements" class="page">
+                <div class="hero-text page-header">
+                    <h1>ЭЛЕМЕНТЫ ТЕЛА</h1>
+                    <p>Равновесие, Вращение, Прыжок</p>
+                </div>
+                <section class="section">
+                    <details class="content-acc">
+                        <summary>Равновесие</summary>
+                        <div class="details-content">
+                            <p>Действие, выполняемое гимнасткой путем принятия статичной (фиксация в течение минимум 1 секунды) или динамической сложной формы на ограниченной площади опоры с сохранением баланса и эстетической чистоты позы. Равновесия могут выполняться на полупальцах, на полной стопе, на колене, на животе или груди. Границы фрагмента следует начинать с момента, когда гимнастка начинает подготовку к равновесию (делает подготовительный шаг или приседание) и закончить в момент, когда гимнастка выходит из формы и опускает ногу. Отметка «Действие прервано» ставится в случае: 1) если форма элемента имеет большое отклонение от формы (более 20°) одной или более частей тела; 2) если при выполнении равновесия полностью отсутствует замирание в форме (маховое движение); 3) если гимнастка потеряла равновесие (подскок/падение); 4) если гимнастка потеряла предмет.</p>
+                            <h4>Пассе (0,1)</h4>
+                            <ul>
+                                <li><strong>Пассе вперед:</strong> Спортсменка стоит на одной ноге (выпрямлена в колене) на полупальцах. Вторая нога согнута в колене и прижата пальцами к колену. Колено этой второй ноги уведено вперед. Тело выпрямлено вверх.</li>
+                                <li><strong>Пассе в сторону:</strong> Спортсменка стоит на одной ноге (выпрямлена в колене) на полупальцах. Вторая нога согнута в колене и прижата пальцами к колену. Колено этой второй ноги уведено в сторону. Тело выпрямлено вверх.</li>
+                            </ul>
+                            <h4>Свободная нога вперёд</h4>
+                            <ul>
+                                <li><strong>Горизонтально вперед (0,1):</strong> Спортсменка стоит на одной ноге на полупальцах и держит другую ногу впереди на 90 градусов, коленка этой ноги согнута на 30 градусов.</li>
+                                <li><strong>Горизонтально вперед выпрямленная (0,2):</strong> Обе ноги выпрямлены. Тело тянется вертикально вверх.</li>
+                            </ul>
+                            <h4>Передний шпагат</h4>
+                            <ul>
+                                <li><strong>С помощью (0,3):</strong> Стоя на одной ноге на полупальцах, держит рукой вторую ногу впереди, стопа выше головы. Угол 180+.</li>
+                                <li><strong>Без помощи (0,5):</strong> Вторая нога вытянута вперед вверх, стопа выше головы. Не держит ногу руками.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </section>
+                <section class="section">
+                    <details class="content-acc">
+                        <summary>Вращение</summary>
+                        <div class="details-content">
+                            <p>Вращательное движение тела гимнастки вокруг вертикальной оси, выполняемое с принятием определенной формы во время вращения. Вращения могут выполняться на полупальцах, на полной стопе, на животе или груди; на 180, 360 или более градусов. Отсчет числа и поворотных градусов вращения идет с момента принятия спортсменкой определенной формы. Границы фрагмента следует начинать с момента, когда гимнастка начинает подготовку к вращению и закончить в момент, когда гимнастка выходит из формы и прекращает вращение.</p>
+                            <h4>Базовые формы</h4>
+                            <ul>
+                                <li><strong>Пассе вперёд (0,1):</strong> Нога согнута, носок к колену, колено вперёд. Мин. 360°.</li>
+                                <li><strong>Спиральный поворот «Тонно» (0,3):</strong> Прогиб назад → наклон вперёд, иллюзия спиральных волн. Мин. 360°.</li>
+                            </ul>
+                            <h4>Шпагаты</h4>
+                            <ul>
+                                <li><strong>Передний шпагат с помощью (0,3):</strong> Нога вперёд 180°+, захват рукой. Мин. 360°.</li>
+                                <li><strong>Задний шпагат без помощи (0,5):</strong> Нога выше головы, без захвата. Мин. 360°.</li>
+                            </ul>
+                            <h4>Именные вращения</h4>
+                            <ul>
+                                <li><strong>Кабаева (КВ) (0,5):</strong> Нога вперёд 180°+, тело назад к бедру опорной ноги. Мин. 180°.</li>
+                                <li><strong>Гизикова (GZ) (0,7):</strong> Нога вперёд 180°+ → выкрут в сторону → задний шпагат. Мин. 360°.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </section>
+                <section class="section">
+                    <details class="content-acc">
+                        <summary>Прыжок</summary>
+                        <div class="details-content">
+                            <p>Сильное отталкивание одной или двумя ногами от пола с последующим выполнением сложной формы в воздухе. Прыжки бывают без поворота и с поворотом вокруг оси спортсменки; с и без смены ног в полете; с прогибом туловища назад и/или в кольцо. Границы фрагмента следует начинать с момента, когда гимнастка начинает подготовку к прыжку (разбег или подскок) и закончить в момент приземления.</p>
+                            <h4>Базовые прыжки</h4>
+                            <ul>
+                                <li><strong>Согнув ноги + поворот 360° (0,1):</strong> Ноги прижаты к телу, приземление на 2 ноги.</li>
+                                <li><strong>Прямые ноги + поворот 720° (0,3):</strong> Ноги прямые, единая линия. Поворот 720°.</li>
+                            </ul>
+                            <h4>Шпагаты</h4>
+                            <ul>
+                                <li><strong>В шпагат (0,3):</strong> Одна нога вперёд, другая назад, 180°+. Тело вертикально.</li>
+                                <li><strong>Зарипова (ZR) + наклон назад (0,7):</strong> Задняя согнута в кольцо, тело назад, касание головой бедра.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: РАБОТА С ПРЕДМЕТОМ -->
+            <div id="page-object-elements" class="page">
+                <div class="hero-text page-header">
+                    <h1>РАБОТА<br>С ПРЕДМЕТОМ</h1>
+                    <p>Мяч, обруч, булавы, лента, скакалка</p>
+                </div>
+                <div class="content-acc" style="text-align: center; padding: 5rem;">
+                    <h2 style="color: var(--accent-orange); margin-bottom: 1rem; font-size: 2.5rem;">В РАЗРАБОТКЕ</h2>
+                    <p style="font-family: 'Raleway', sans-serif;">Здесь будет размещена информация о разметке элементов с предметами.</p>
                 </div>
             </div>
 
-            <!-- Другие страницы -->
-            <div id="page-glossary" class="page"><div class="hero-text"><h1>ГЛОССАРИЙ</h1><p>Термины</p></div></div>
-            <div id="page-body-elements" class="page"><div class="hero-text"><h1>ЭЛЕМЕНТЫ ТЕЛА</h1></div></div>
-            <div id="page-object-elements" class="page"><div class="hero-text"><h1>РАБОТА С ПРЕДМЕТОМ</h1></div></div>
-            <div id="page-da" class="page"><div class="hero-text"><h1>КРИТЕРИИ DA</h1></div></div>
-            <div id="page-gymnasts-august" class="page"><div class="hero-text"><h1>ГИМНАСТКИ АВГУСТ</h1></div></div>
-            <div id="page-validation" class="page"><div class="hero-text"><h1>ВАЛИДАЦИЯ</h1></div></div>
+            <!-- СТРАНИЦА: DA -->
+            <div id="page-da" class="page">
+                <div class="hero-text page-header">
+                    <h1>КРИТЕРИИ DA</h1>
+                    <p>Особенности разметки</p>
+                </div>
+                <section class="section">
+                    <details class="content-acc" open>
+                        <summary>Критерии элемента DA</summary>
+                        <div class="details-content">
+                            <p>Элемент DA — технически сложная манипуляция с предметом, при которой во время работы с предметом выполняются минимум 2 критерия из таблицы. Должны выполняться именно два критерия во время работы.</p>
+                            <ul>
+                                <li><strong>Вне поля зрения:</strong> Работа с предметом в зонах за спиной/сбоку-сзади. (В больших перекатах / скольжении данный критерий засчитывается только если какая-либо часть работы выполняется в зоне «вне поля зрения»).</li>
+                                <li><strong>Без помощи рук:</strong> Предмет движется самостоятельно — от импульса другой части тела или после начального импульса руки.</li>
+                                <li><strong>Под ногой/ногами:</strong> Предмет движется самостоятельно под ногой или ногами гимнастки.</li>
+                                <li><strong>Положение лёжа на полу:</strong> Опора на верхнюю часть тела (плечи, грудь или лопатки).</li>
+                                <li><strong>Полная волна телом (W):</strong> Последовательное сокращение/расслабление всех мышц тела.</li>
+                                <li><strong>Вращение вокруг своей оси:</strong> Минимум 360°. Трудность тела не может использоваться как элемент вращения.</li>
+                            </ul>
+                            <p><strong>Особый элемент DA: «Вертушка Шугуровой».</strong> Перекат обруча по полу → высокий прыжок с согнутыми ногами точно над вертикалью обруча → две стопы закручивают обруч на полу в вертикальное вращение.</p>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: ГИМНАСТКИ АВГУСТ -->
+            <div id="page-gymnasts-august" class="page">
+                <div class="hero-text page-header">
+                    <h1>ГИМНАСТКИ АВГУСТ</h1>
+                    <p>Общая информация</p>
+                </div>
+                <section class="section">
+                    <details class="content-acc" open>
+                        <summary>Основная информация</summary>
+                        <div class="details-content">
+                            <h4>Описание проекта</h4>
+                            <p><strong>Задание проекта:</strong> Определение и выделение всех выполняемых гимнасткой во время выступления отдельных действий (границы выступления, трудности тела, технические действия). Каждый элемент необходимо выделить отдельным фрагментом в соответствии с классом этого элемента.</p>
+                            <p><strong>Классы объектов разметки:</strong> Техническое, Равновесие, Вращение, Прыжок, Преакробатический элемент, Вертикальное вращение, Динамический элемент с вращением R, Танцевальные шаги.</p>
+                            <p><strong>Входные данные:</strong> Видео выступлений спортсменок.</p>
+                            <p><strong>Требования к выходным данным:</strong> Небольшие отрывки видео (фрагменты), выделенные цветными боксами и включающие выполнение гимнасткой одного отдельного действия. Фрагмент должен включать подготовку к выполнению действия, само действие и завершение его выполнения.</p>
+                        </div>
+                    </details>
+                </section>
+                <section class="section">
+                    <details class="content-acc">
+                        <summary>Основные шаги в разметке</summary>
+                        <div class="details-content">
+                            <h4>Шаг 1: Определить границы выступления</h4>
+                            <p>Необходимо найти начало выступления. Следует ориентироваться на замирание спортсменки в определенной (статичной) позе в течение ~1 секунды и более. С этого момента, не захватывая подготовительные движения и ожидание начала музыки, следует начать протягивать фрагмент класса «Техническое» с названием «Выступление».</p>
+                            <h4>Шаг 2: Определить класс и название действия</h4>
+                            <p>Далее необходимо перейти к разметке действий гимнастки в пределах выделенного фрагмента. Для определения класса и названия действия необходимо внимательно просмотреть отрывок видео, определить основные характеристики действия, сравнить их с информацией в разделе «Объекты разметки» и выбрать класс действия.</p>
+                            <h4>Шаг 3: Выделить фрагмент</h4>
+                            <p>При выделении фрагмента необходимо включить действие в его границы полностью, не обрезая и не захватывания лишнее. Трудности тела могут выполняться подряд – сериями. Каждый элемент серии должен выделяться отдельным фрагментом вплотную, без свободного кадра между ними и без взаимного перекрытия.</p>
+                            <h4>Шаг 4: Отметить дополнительные характеристики</h4>
+                            <p>В данном проекте есть две дополнительные характеристики: «Действие прервано» (ошибка, потеря равновесия/предмета) и «Зум» (не видно часть тела из-за приближения камеры).</p>
+                            <h4>Шаг 5: Самопроверка</h4>
+                            <p>После того, как были размечены все действия гимнастки, необходимо перепроверить размеченное сквозным просмотром видео со сверкой по инструкции и чек-листу элементов.</p>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: ВАЛИДАЦИЯ ВЫСТУПЛЕНИЙ -->
+            <div id="page-validation" class="page">
+                <div class="hero-text page-header">
+                    <h1>ВАЛИДАЦИЯ</h1>
+                    <p>Проверка данных на карте кластеров</p>
+                </div>
+                <section class="section">
+                    <details class="content-acc" open>
+                        <summary>1. Основная информация</summary>
+                        <div class="details-content">
+                            <h4>1.1. Описание проекта</h4>
+                            <p>Задание представляет собой карту распределения размеченных элементов на кластеры. Кластеры состоят из точек преимущественно одного цвета. Точка – это метка, содержащая следующие данные: фрагмент видео, видео со скелетом действия, класс и название действия, границы выполнения.</p>
+                            <h4>1.1.1. Задание проекта</h4>
+                            <p>Задача заключается в анализе карты кластеров и проверке данных, содержащихся в точке-метке. Точки-метки группируются в зоны по схожести скелетов. В точках одного цвета должны содержаться фрагменты с одинаковыми характеристиками. Точки-аномалии (другого цвета) имеют некорректные характеристики. Их необходимо проверить и исправить.</p>
+                        </div>
+                    </details>
+                </section>
+                <section class="section">
+                    <details class="content-acc">
+                        <summary>1.3. Основные шаги в разметке</summary>
+                        <div class="details-content">
+                            <h4>Шаг 1: Выявить подозрительную точку</h4>
+                            <p>Ознакомьтесь с легендой цветов. Проведите визуальный осмотр карты. Ищите точки-аномалии – одиночные метки или небольшие группы, чей цвет резко отличается от цвета основного массива точек в данном кластере.</p>
+                            <h4>Шаг 2: Анализ и исправление содержимого точки</h4>
+                            <p>Оцените фрагмент видео. Если скелет зависает (замирает или искажается), поставьте соответствующую метку в блоке «Проверка сегмента». Определите класс и название выполненного действия. Обратите внимание на границы выполнения действия (тайминг).</p>
+                            <h4>Шаг 3: Исправление класса и/или названия</h4>
+                            <p>Выберите из выпадающего списка правильный класс объекта и название. Передвиньте маркеры начала и конца фрагмента на временной шкале так, чтобы они точно совпадали с началом и концом действия. Проверьте корректность галочек в чек-боксах.</p>
+                            <h4>Шаг 4: Сохранение изменений</h4>
+                            <p>Нажмите кнопку «Сохранить» в блоке «Проверка сегмента». Убедитесь, что точка на карте изменила свой цвет на соответствующий исправленному классу.</p>
+                            <h4>Шаг 5: Переход к следующей точке и итерация</h4>
+                            <p>Повторяйте цикл «Выявление → Просмотр видео/скелета → Исправление → Сохранение». Периодически отдаляйте карту для оценки общей картины.</p>
+                            <h4>Шаг 6: Завершение работы</h4>
+                            <p>Работа завершена, когда каждый крупный кластер представляет собой зону с точками одного цвета, а все изолированные точки других цветов переклассифицированы или обоснованы.</p>
+                        </div>
+                    </details>
+                </section>
+            </div>
+
+            <!-- СТРАНИЦА: ИСТОЧНИКИ -->
+            <div id="page-sources" class="page">
+                <div class="hero-text page-header">
+                    <h1>ИСТОЧНИКИ</h1>
+                    <p>Благодарности</p>
+                </div>
+                <div class="sources-card content-acc">
+                    <h2>Авторство материалов</h2>
+                    <ul class="sources-list">
+                        <li>
+                            <strong>Иконка «Главная»</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/-" title="Главная кнопка иконки" target="_blank" rel="noopener noreferrer">Главная кнопка иконки от icon_small - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Элементы тела» (Гимнастка)</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/" title="гимнастка иконки" target="_blank" rel="noopener noreferrer">Гимнастка иконки от DinosoftLabs - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Работа с предметом»</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/" title="пилатес иконки" target="_blank" rel="noopener noreferrer">Пилатес иконки от Yogi Aprelliyanto - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Интеллектуальная собственность» (Источники)</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/-" title="интеллектуальная собственность иконки" target="_blank" rel="noopener noreferrer">Интеллектуальная собственность иконки от Arkinasi - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «База знаний»</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/-" title="база знаний иконки" target="_blank" rel="noopener noreferrer">База знаний иконки от HideMaru - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Разметка проектов» (Контрольный список)</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/-" title="контрольный список иконки" target="_blank" rel="noopener noreferrer">Контрольный список иконки от Iamkikirizky - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Глоссарий» (Словарь)</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/" title="Словарь иконки" target="_blank" rel="noopener noreferrer">Словарь иконки от Magnific - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Гимнастки август»</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/" title="поза иконки" target="_blank" rel="noopener noreferrer">Поза иконки от DinosoftLabs - Flaticon</a>
+                        </li>
+                        <li>
+                            <strong>Иконка «Валидация» (Контроль качества)</strong><br>
+                            <a href="https://www.flaticon.com/ru/free-icons/-" title="контроль качества иконки" target="_blank" rel="noopener noreferrer">Контроль качества иконки от zero_wing - Flaticon</a>
+                        </li>
+                    </ul>
+                    <p style="text-align: center; margin-top: 3rem; font-size: 0.9rem; color: var(--text-light); font-family: 'Raleway', sans-serif; text-transform: uppercase;">
+                        © 2026 Справочник по разметке гимнасток
+                    </p>
+                </div>
+            </div>
+
+            <!-- ЗАГЛУШКИ ДЛЯ ОСТАЛЬНЫХ ПУНКТОВ МЕНЮ -->
+            <div id="page-gymnasts-apparatus" class="page"><div class="hero-text page-header"><h1>РАЗМЕТКА С ПРЕДМЕТОМ</h1><p>В разработке</p></div></div>
+            <div id="page-gymnastics-prep" class="page"><div class="hero-text page-header"><h1>ПОДГОТОВКА ВЫСТУПЛЕНИЙ</h1><p>В разработке</p></div></div>
+            <div id="page-gymnastics-check" class="page"><div class="hero-text page-header"><h1>ГИМНАСТИКА ПРОВЕРКА</h1><p>В разработке</p></div></div>
+
         </main>
     </div>
 
