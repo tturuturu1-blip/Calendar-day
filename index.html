@@ -3,141 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Calendar</title>
-    
-    <!-- ИКОНКА САЙТА -->
-    <link rel="icon" type="image/png" href="icon.png">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    
-    <!-- Добавлен ?v=4 для сброса кеша -->
-    <link rel="stylesheet" href="css/style.css?v=4">
+    <title>Разметка гимнасток</title>
+    <link rel="icon" type="image/png" href="icon/gimnastka.png">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <div class="app-container">
-        
-        <!-- ==================== ЭКРАН: КАЛЕНДАРЬ + РАСПИСАНИЕ ==================== -->
-        <section class="view active">
+<body class="menu-open">
+
+    <!-- БОКОВОЕ МЕНЮ -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-btn active" onclick="navigate('home')" id="nav-home">
+                <div class="nav-icon-wrapper"><div class="nav-icon-img icon-home"></div></div>
+                <span class="nav-text">Главная</span>
+            </a>
             
-            <!-- ФИКСИРОВАННАЯ ВЕРХНЯЯ ЧАСТЬ (Календарь) -->
-            <div class="calendar-fixed-part">
-                <header class="app-header">
-                    <div class="header-left">
-                        <button class="icon-btn" id="prevMonthBtn" title="Предыдущий месяц">‹</button>
-                        <button class="month-selector" id="monthPickerBtn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            <span id="monthTitle">Ноябрь</span>
-                        </button>
-                        <button class="icon-btn" id="nextMonthBtn" title="Следующий месяц">›</button>
-                        <button class="today-btn" id="todayBtn" title="Перейти к сегодня">Сегодня</button>
-                    </div>
-                    <div class="header-right">
-                        <button class="add-btn-header" id="addBtn" title="Добавить событие">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        </button>
-                    </div>
-                </header>
-
-                <div class="weekdays" id="weekdaysHeader">
-                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="weekend">Сб</div><div class="weekend">Вс</div>
+            <details class="nav-group">
+                <summary>
+                    <div class="nav-icon-wrapper"><div class="nav-icon-img icon-gymnast"></div></div>
+                    <span class="nav-text">База знаний</span>
+                    <span class="summary-arrow nav-text">▼</span>
+                </summary>
+                <div class="sub-nav">
+                    <a href="#" class="nav-btn" onclick="navigate('glossary')" id="nav-glossary">Глоссарий</a>
+                    <a href="#" class="nav-btn" onclick="navigate('body-elements')" id="nav-body-elements">Элементы тела</a>
+                    <a href="#" class="nav-btn" onclick="navigate('object-elements')" id="nav-object-elements">Работа с предметом</a>
+                    <a href="#" class="nav-btn" onclick="navigate('da')" id="nav-da">DA</a>
                 </div>
-                <div class="days-grid" id="daysGrid"></div>
-            </div>
+            </details>
 
-            <!-- ПРОКРУЧИВАЕМАЯ НИЖНЯЯ ЧАСТЬ (Расписание) -->
-            <div class="schedule-section" id="scheduleSection">
-                <div class="agenda-header">
-                    <div class="date-info">
-                        <div class="date-large">
-                            <span id="selectedDateLarge">13</span>
-                            <span id="selectedMonth" class="month-small">ноября</span>
+            <details class="nav-group">
+                <summary>
+                    <div class="nav-icon-wrapper"><div class="nav-icon-img icon-validation"></div></div>
+                    <span class="nav-text">Разметка</span>
+                    <span class="summary-arrow nav-text">▼</span>
+                </summary>
+                <div class="sub-nav">
+                    <a href="#" class="nav-btn" onclick="navigate('gymnasts-august')" id="nav-gymnasts-august">Гимнастки август</a>
+                    <a href="#" class="nav-btn" onclick="navigate('validation')" id="nav-validation">Валидация</a>
+                </div>
+            </details>
+        </nav>
+    </aside>
+
+    <!-- ОБЕРТКА ДЛЯ КОНТЕНТА -->
+    <div class="main-wrapper">
+        
+        <!-- ШАПКА -->
+        <header>
+            <div class="header-left">
+                <div class="header-logo-area" onclick="toggleMenu()">
+                    <div class="header-logo-icon" title="Открыть/Скрыть меню">
+                        <div class="nav-icon-img icon-gymnast"></div>
+                    </div>
+                    <div class="logo-text">РАЗМЕТКА<br>ГИМНАСТОК</div>
+                </div>
+            </div>
+            
+            <div class="header-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" placeholder="Поиск...">
+            </div>
+        </header>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <main>
+            <div id="page-home" class="page active">
+                <div class="hero-split">
+                    <div class="hero-text">
+                        <!-- Измененный заголовок -->
+                        <h1>РАЗМЕТКА ПРОЕКТОВ<br>ПО ГИМНАСТИКЕ</h1>
+                        <p>База знаний и инструкции</p>
+                    </div>
+                    <div class="hero-image-container">
+                        <div class="hero-decor-1"></div>
+                        <div class="hero-decor-2"></div>
+                        <div class="hero-img-wrapper">
+                            <img src="images/websiteheader.jpg" alt="Гимнастка">
                         </div>
-                        <div class="full-weekday" id="agendaWeekday">Понедельник</div>
-                    </div>
-                    <div class="agenda-controls">
-                        <button class="view-toggle-btn" id="viewToggleBtn">Расписание</button>
-                        <span class="event-count" id="eventSummary">0 событий</span>
                     </div>
                 </div>
 
-                <!-- Вертикальный таймлайн -->
-                <div class="timeline-wrapper" id="timelineWrapper">
-                    <!-- Генерируется через JS -->
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- Модальное окно добавления/редактирования -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Новое событие</h3>
-                <button class="close-modal-btn" id="closeModalBtn">&times;</button>
-            </div>
-            <form id="eventForm">
-                <div class="input-group">
-                    <label>Название</label>
-                    <input type="text" id="evTitle" required placeholder="Например: Встреча">
-                </div>
-                <div class="input-group">
-                    <label>Дата</label>
-                    <input type="date" id="evDate" required>
-                </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Время начала</label>
-                        <input type="time" id="evTime" required>
+                <div class="home-grid">
+                    <div class="home-card" onclick="navigate('glossary')">
+                        <div class="card-icon-circle bg-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <div><h3>Глоссарий</h3><p>Термины и их сокращения, используемые в разметке.</p></div>
+                        <div class="arrow">→</div>
                     </div>
-                    <div class="input-group">
-                        <label>Время окончания</label>
-                        <input type="time" id="evEndTime" required>
+                    <div class="home-card" onclick="navigate('body-elements')">
+                        <div class="card-icon-circle bg-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6 12h12"></path><path d="M12 5v14"></path><path d="M8 22l4-5 4 5"></path></svg>
+                        </div>
+                        <div><h3>Элементы тела</h3><p>Описание равновесий, вращений, прыжков и других элементов.</p></div>
+                        <div class="arrow">→</div>
+                    </div>
+                    <div class="home-card" onclick="navigate('validation')">
+                        <div class="card-icon-circle bg-dark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                        </div>
+                        <div><h3>Валидация</h3><p>Инструкция по проверке и исправлению данных на карте кластеров.</p></div>
+                        <div class="arrow">→</div>
                     </div>
                 </div>
-                <div class="input-group">
-                    <label>Описание</label>
-                    <textarea id="evDesc" placeholder="Детали события..."></textarea>
-                </div>
-                <button type="submit" class="submit-btn">Сохранить</button>
-            </form>
-        </div>
+            </div>
+
+            <!-- Другие страницы -->
+            <div id="page-glossary" class="page"><div class="hero-text"><h1>ГЛОССАРИЙ</h1><p>Термины</p></div></div>
+            <div id="page-body-elements" class="page"><div class="hero-text"><h1>ЭЛЕМЕНТЫ ТЕЛА</h1></div></div>
+            <div id="page-object-elements" class="page"><div class="hero-text"><h1>РАБОТА С ПРЕДМЕТОМ</h1></div></div>
+            <div id="page-da" class="page"><div class="hero-text"><h1>КРИТЕРИИ DA</h1></div></div>
+            <div id="page-gymnasts-august" class="page"><div class="hero-text"><h1>ГИМНАСТКИ АВГУСТ</h1></div></div>
+            <div id="page-validation" class="page"><div class="hero-text"><h1>ВАЛИДАЦИЯ</h1></div></div>
+        </main>
     </div>
 
-    <!-- Модальное окно: ВЫБОР МЕСЯЦА / ДАТЫ -->
-    <div class="modal-overlay" id="monthPickerModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Выбор месяца</h3>
-                <button class="close-modal-btn" id="closeMonthPickerBtn">&times;</button>
-            </div>
-            <div class="picker-year-nav">
-                <button class="icon-btn" id="pickerPrevYear">‹</button>
-                <span id="pickerYearLabel">2024</span>
-                <button class="icon-btn" id="pickerNextYear">›</button>
-            </div>
-            <div class="picker-months-grid" id="pickerMonthsGrid"></div>
-            <div class="picker-jump-section">
-                <label>Или перейти к конкретному дню:</label>
-                <input type="date" id="jumpToDateInput">
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно: ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ -->
-    <div class="modal-overlay" id="deleteModal">
-        <div class="modal-content" style="padding: 24px; text-align: center;">
-            <h3 style="margin-bottom: 10px; font-size: 18px;">Удалить событие?</h3>
-            <p style="color: var(--secondary-text); margin-bottom: 24px;">Это действие нельзя будет отменить.</p>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-cancel" style="flex: 1; padding: 12px; font-size: 14px; border-radius: 12px; font-weight: 700;" onclick="closeDeleteModal()">Отмена</button>
-                <button class="submit-btn" style="flex: 1; margin-top: 0; background: #ef4444; border-color: #dc2626; border-radius: 12px;" onclick="confirmDelete()">Удалить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Добавлен ?v=4 для сброса кеша -->
-    <script src="js/app.js?v=4"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
